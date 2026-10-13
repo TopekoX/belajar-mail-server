@@ -1,6 +1,64 @@
 # Mail Server Ubuntu Learning Portal
 
-Kurikulum interaktif (dashboard) dan materi Markdown untuk membangun dan mengelola mail server dengan Ubuntu Server. Detail produk dan arsitektur: `docs/PRD.md`, `docs/TECHNICAL-DESIGN.md`.
+Portal belajar berbahasa Indonesia untuk membangun dan mengelola **mail server dengan Ubuntu Server 24.04 LTS**, dari dasar Linux sampai operasi produksi. Detail produk dan arsitektur: `docs/PRD.md`, `docs/TECHNICAL-DESIGN.md`.
+
+## Apa isi proyek ini
+
+Proyek ini terdiri dari **dua bagian yang saling terhubung**:
+
+| Bagian | Apa itu | Untuk apa | Alamat setelah dibangun |
+|---|---|---|---|
+| **Dashboard kurikulum** | Satu file HTML mandiri (`kurikulum-mail-server-ubuntu.html`) | Peta seluruh kurikulum: level, modul, chapter, prasyarat, estimasi waktu, checklist, dan pelacak progres belajar | `/` |
+| **Materi (MkDocs)** | Berkas Markdown di `materi/`, dibangun oleh MkDocs menjadi situs dokumentasi | Isi pelajaran lengkap per chapter | `/materi/` |
+
+Keduanya saling menaut: tombol **Materi** di header dashboard menuju `/materi/`, tombol **Buka materi** pada chapter yang sudah terbit menuju halaman chapter, dan setiap halaman materi punya tautan **Kembali ke dashboard**.
+
+Dashboard memuat seluruh struktur kurikulum, termasuk chapter yang materinya belum ditulis. Chapter yang belum terbit tampil sebagai *spesifikasi dan rencana cakupan* dan tidak punya tombol "Buka materi".
+
+## Cara membaca kode dan istilah
+
+Kurikulum disusun bertingkat: **Level/Kategori > Modul > Chapter**.
+
+| Kode | Arti | Contoh |
+|---|---|---|
+| `L0` sampai `L15` | *Level*: 16 tingkat belajar. Satu level sama dengan satu kategori | `L1` = Dasar Linux dan Jaringan |
+| `CAT-NN` | *Kategori*, sama dengan level. **Nomor `CAT` selalu lebih besar satu dari nomor level** | `CAT-02` = `L1` |
+| `MOD-NN-NN` | *Modul* di dalam kategori | `MOD-02-03` = modul Jaringan di L1 |
+| `CH-NN-NN-NN` | *Chapter* (satu bab materi): kategori, modul, urutan chapter | `CH-02-03-02` = Resolusi DNS dan Alat Diagnosis |
+| `LAB-`, `ASM-`, `LES-` | Kode latihan, assessment, dan lesson per chapter di dashboard | `LAB-02-03-02` |
+
+Kode `CH-` tidak pernah berubah dan dipakai di dashboard, nama berkas (`materi/chapter/CH-02-03-02.md`), dan URL (`/materi/chapter/CH-02-03-02/`).
+
+### Lima tahap lingkungan
+
+Kurikulum dijalankan bertahap. Pindah tahap hanya setelah kriteria tahap sebelumnya terbukti.
+
+| Tahap | Cakupan | Lingkungan |
+|---|---|---|
+| 1 | `CAT-01` sampai `CAT-07` | Lab lokal (VM) |
+| 2 | `CAT-08`, `CAT-09` | Lab dengan domain milik sendiri |
+| 3 | `CAT-10`, `CAT-11` | Lab: hardening, monitoring, backup |
+| 4 | `CAT-12` (modul pertama) | Uji publik (VPS, IP publik, PTR) |
+| 5 | `CAT-12` (go-live), `CAT-13`, `CAT-14` | Produksi |
+
+Keberhasilan di lab tidak otomatis berarti siap produksi. Setiap chapter membedakan prosedur lab dan produksi.
+
+## Status materi saat ini
+
+- Struktur: 16 level, 136 chapter terdaftar di dashboard.
+- **Materi terbit:** L0 (3 chapter), L1 (12 chapter), dan `CH-03-01-01` dari L2. Totalnya 16 chapter ditambah ringkasan level L0 dan L1.
+- Chapter lain masih berupa spesifikasi di dashboard dan akan ditulis bertahap tanpa mengubah ID.
+- Perintah Linux pada materi diuji secara terbatas (perintah baca-saja pada Ubuntu 24.04 di WSL2). Setiap chapter mencantumkan perintah mana yang **belum dijalankan** penulis; perhatikan catatan verifikasi di awal chapter dan jalankan perintah yang mengubah sistem hanya di VM lab, setelah membuat snapshot.
+
+## Memulai
+
+- **Ingin belajar?** Bangun dan buka situs secara lokal (bagian [Menjalankan dashboard dan materi secara lokal](#menjalankan-dashboard-dan-materi-secara-lokal)), lalu mulai dari `CH-01-01-01` (Peta Belajar), lanjut sesuai urutan prasyarat di dashboard.
+- **Ingin menulis atau menambah materi?** Lihat `CLAUDE.md`, `docs/PRD.md`, dan `docs/TECHNICAL-DESIGN.md`. Satu chapter = satu berkas `materi/chapter/CH-NN-NN-NN.md` dengan front matter dan 14 bagian wajib, lalu didaftarkan di `nav` pada `mkdocs.yml`.
+- **Ingin men-deploy?** Lihat bagian [Deploy](#deploy).
+
+### Progres belajar
+
+Status belajar dan checklist di dashboard disimpan di **localStorage browser** Anda, bukan di server. Data dapat hilang jika data browser dibersihkan atau memakai mode privat. Gunakan fitur ekspor JSON secara berkala dan jangan menaruh kredensial di catatan belajar.
 
 ## Struktur
 
