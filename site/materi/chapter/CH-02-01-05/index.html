@@ -1,0 +1,2132 @@
+
+<!doctype html>
+<html lang="id" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Materi pembelajaran membangun dan mengelola mail server dengan Ubuntu Server.">
+      
+      
+      
+        <link rel="canonical" href="https://topekox.github.io/belajar-mail-server/chapter/CH-02-01-05/">
+      
+      
+        <link rel="prev" href="../CH-02-01-04/">
+      
+      
+        <link rel="next" href="../CH-02-02-01/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Dasar Shell Scripting - Belajar Mail Server</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dasar-shell-scripting" class="md-skip">
+          Lewati ke isi
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Belajar Mail Server" class="md-header__button md-logo" aria-label="Belajar Mail Server" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Belajar Mail Server
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dasar Shell Scripting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Cari" placeholder="Cari" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Cari">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Kosongkan" aria-label="Kosongkan" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Mempersiapkan pencarian
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigasi" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Belajar Mail Server" class="md-nav__button md-logo" aria-label="Belajar Mail Server" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Belajar Mail Server
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Beranda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L0 · Orientasi dan Persiapan Belajar
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    L0 · Orientasi dan Persiapan Belajar
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../level/L0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ringkasan Level 0
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orientasi Kurikulum
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Orientasi Kurikulum
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-01-01-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-01-01-01 · Peta Belajar dan Profil Pembelajar
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-01-01-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-01-01-02 · Menyiapkan Lingkungan Lab (VM dan Snapshot)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-01-01-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-01-01-03 · Jalur Lab ke Produksi dan Etika Operasional
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 · Dasar Linux dan Jaringan
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    L1 · Dasar Linux dan Jaringan
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../level/L1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ringkasan Level 1
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Line dan Administrasi Dasar
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Command Line dan Administrasi Dasar
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-01-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-01 · Konsep Linux dan Ubuntu Server
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-01-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-02 · Navigasi Filesystem dan Hierarki Direktori
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-01-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-03 · Pengguna, Grup, Izin, dan sudo
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-01-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-04 · Manajemen Paket dengan APT
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-05 · Dasar Shell Scripting
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-01-05 · Dasar Shell Scripting
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Daftar isi">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Daftar isi
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-ringkasan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Ringkasan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tujuan-pembelajaran" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tujuan Pembelajaran
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-prasyarat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Prasyarat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-materi-teori" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Materi Teori
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Materi Teori">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-struktur-skrip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Struktur skrip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-mode-aman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Mode aman
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-variabel-kondisi-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Variabel, kondisi, loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-kebiasaan-aman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Kebiasaan aman
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-praktik-dan-implementasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Praktik dan Implementasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-perintah-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Perintah Linux
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-konfigurasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Konfigurasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-verifikasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Verifikasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-security-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Security Review
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-latihan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Latihan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Assessment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-checklist-kelulusan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Checklist Kelulusan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-referensi-resmi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Referensi Resmi
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service dan Proses
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service dan Proses
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-02-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-02-01 · systemd dan Manajemen Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-02-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-02-02 · Proses, Socket, dan Port Listening
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jaringan
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Jaringan
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-03-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-03-01 · Alamat IP, Subnet, Routing, dan Gateway
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-03-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-03-02 · Resolusi DNS dan Alat Diagnosis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-03-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-03-03 · TCP/IP, Port, dan Firewall (UFW/nftables)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-03-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-03-04 · Diagnosis Koneksi dengan curl dan openssl
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSH
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSH
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-02-04-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-02-04-01 · Administrasi Server dengan SSH
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L2 · Fundamental Arsitektur Email
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    L2 · Fundamental Arsitektur Email
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model dan Protokol Email
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model dan Protokol Email
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CH-03-01-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CH-03-01-01 · Siklus Hidup Email dan Peran MUA, MSA, MTA, MDA
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--published"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Daftar isi">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Daftar isi
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-ringkasan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Ringkasan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tujuan-pembelajaran" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tujuan Pembelajaran
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-prasyarat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Prasyarat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-materi-teori" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Materi Teori
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Materi Teori">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-struktur-skrip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Struktur skrip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-mode-aman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Mode aman
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-variabel-kondisi-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Variabel, kondisi, loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-kebiasaan-aman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Kebiasaan aman
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-praktik-dan-implementasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Praktik dan Implementasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-perintah-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Perintah Linux
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-konfigurasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Konfigurasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-verifikasi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Verifikasi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-security-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Security Review
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-latihan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Latihan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Assessment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-checklist-kelulusan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Checklist Kelulusan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-referensi-resmi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Referensi Resmi
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="dasar-shell-scripting">Dasar Shell Scripting<a class="headerlink" href="#dasar-shell-scripting" title="Permanent link">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">Identitas chapter</p>
+<p><strong>ID:</strong> <code>CH-02-01-05</code> · <strong>Kategori/modul:</strong> CAT-02 / MOD-02-01 · <strong>Estimasi:</strong> 150 menit · <strong>Lingkungan:</strong> lab lokal (VM) · <a href="../../../#CH-02-01-05">Lihat di dashboard</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Catatan verifikasi</p>
+<p>Skrip contoh dijalankan pada 2026-10-13 di Ubuntu 24.04.3 LTS (WSL2) dengan GNU bash 5.2.21. <code>shellcheck</code> <strong>tidak terpasang</strong> pada lingkungan uji, sehingga tidak dijalankan.</p>
+</div>
+<h2 id="1-ringkasan">1. Ringkasan<a class="headerlink" href="#1-ringkasan" title="Permanent link">&para;</a></h2>
+<p>Anda menulis skrip bash sederhana yang aman: variabel, kondisi, loop, dan exit status. Skrip diagnostik kecil akan menjadi bahan baku deliverable Level 1 (skrip diagnostik dasar).</p>
+<h2 id="2-tujuan-pembelajaran">2. Tujuan Pembelajaran<a class="headerlink" href="#2-tujuan-pembelajaran" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Menulis skrip bash sederhana yang aman.</li>
+<li>Memakai variabel, kondisi, loop, dan exit status.</li>
+</ol>
+<h2 id="3-prasyarat">3. Prasyarat<a class="headerlink" href="#3-prasyarat" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>CH-02-01-04</code> — manajemen paket; Anda nyaman mengetik perintah dan mengatur izin berkas.</li>
+</ul>
+<h2 id="4-materi-teori">4. Materi Teori<a class="headerlink" href="#4-materi-teori" title="Permanent link">&para;</a></h2>
+<h3 id="41-struktur-skrip">4.1 Struktur skrip<a class="headerlink" href="#41-struktur-skrip" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Baris pertama (<em>shebang</em>) <code>#!/usr/bin/env bash</code> memilih interpreter.</li>
+<li>Berkas harus dapat dieksekusi (<code>chmod +x</code>).</li>
+<li>Setiap perintah mengembalikan <strong>exit status</strong>: <code>0</code> sukses, bukan nol gagal. Nilai terakhir ada di <code>$?</code>.</li>
+</ul>
+<h3 id="42-mode-aman">4.2 Mode aman<a class="headerlink" href="#42-mode-aman" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Opsi</th>
+<th>Efek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-e</code></td>
+<td>Berhenti saat sebuah perintah gagal</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td>Menganggap variabel yang belum diisi sebagai galat</td>
+</tr>
+<tr>
+<td><code>-o pipefail</code></td>
+<td>Pipeline gagal jika salah satu bagiannya gagal</td>
+</tr>
+</tbody>
+</table>
+<p>Opsi ini bukan jaminan penuh; tetap uji jalur gagal skrip Anda.</p>
+<h3 id="43-variabel-kondisi-loop">4.3 Variabel, kondisi, loop<a class="headerlink" href="#43-variabel-kondisi-loop" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Variabel: <code>nama="nilai"</code>, dipakai sebagai <code>"$nama"</code>. <strong>Selalu beri tanda kutip</strong> agar spasi tidak memecah nilai.</li>
+<li>Parameter bawaan: <code>"${1:-example.com}"</code> memakai argumen pertama atau nilai default.</li>
+<li>Kondisi: <code>if ...; then ...; else ...; fi</code>.</li>
+<li>Loop: <code>for item in a b c; do ...; done</code>.</li>
+<li>Gunakan <code>test</code>/<code>[ ... ]</code> atau <code>[[ ... ]]</code> untuk perbandingan.</li>
+</ul>
+<h3 id="44-kebiasaan-aman">4.4 Kebiasaan aman<a class="headerlink" href="#44-kebiasaan-aman" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Kutip semua ekspansi variabel.</li>
+<li>Jangan menjalankan input yang tak tepercaya sebagai perintah.</li>
+<li>Tulis galat ke stderr (<code>&gt;&amp;2</code>) dan keluar dengan status bukan nol.</li>
+<li>Jangan menaruh kata sandi di dalam skrip.</li>
+<li>Periksa skrip dengan <code>shellcheck</code> jika terpasang (opsional).</li>
+</ul>
+<h2 id="5-praktik-dan-implementasi">5. Praktik dan Implementasi<a class="headerlink" href="#5-praktik-dan-implementasi" title="Permanent link">&para;</a></h2>
+<p><strong>Checklist persiapan</strong></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Saya berada di direktori latihan, bukan di <code>/etc</code>.</li>
+</ul>
+<p><strong>Langkah</strong></p>
+<ol>
+<li>Tulis skrip pemeriksa DNS <code>cek.sh</code> (bagian 6).</li>
+<li>Jalankan dengan argumen default, dengan nama yang tidak ada, dan amati exit status.</li>
+<li>Tambahkan loop untuk beberapa nama host.</li>
+<li>(Opsional) Pasang <code>shellcheck</code> dengan <code>sudo apt install shellcheck</code> dan periksa skrip Anda.</li>
+</ol>
+<h2 id="6-perintah-linux">6. Perintah Linux<a class="headerlink" href="#6-perintah-linux" title="Permanent link">&para;</a></h2>
+<p>Skrip (diuji):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="ch">#!/usr/bin/env bash</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">host_tujuan</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="nv">example</span><span class="p">.com</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">if</span><span class="w"> </span>getent<span class="w"> </span>hosts<span class="w"> </span><span class="s2">"</span><span class="nv">$host_tujuan</span><span class="s2">"</span><span class="w"> </span>&gt;/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"DNS OK: </span><span class="nv">$host_tujuan</span><span class="s2">"</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">else</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"DNS GAGAL: </span><span class="nv">$host_tujuan</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">fi</span>
+</code></pre></div>
+<p>Menjalankan:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># pengguna biasa</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>cek.sh
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>./cek.sh<span class="p">;</span><span class="w">                    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"exit=</span><span class="nv">$?</span><span class="s2">"</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>./cek.sh<span class="w"> </span>tidak-ada.invalid<span class="p">;</span><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"exit=</span><span class="nv">$?</span><span class="s2">"</span>
+</code></pre></div>
+<p>Output yang diamati pada uji:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>DNS OK: example.com
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>exit=0
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>DNS GAGAL: tidak-ada.invalid
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>exit=1
+</code></pre></div>
+<p>Loop (konsep; belum dijalankan terpisah):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span><span class="w"> </span>host<span class="w"> </span><span class="k">in</span><span class="w"> </span>example.com<span class="w"> </span>example.org<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>./cek.sh<span class="w"> </span><span class="s2">"</span><span class="nv">$host</span><span class="s2">"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"periksa </span><span class="nv">$host</span><span class="s2">"</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">done</span>
+</code></pre></div>
+<h2 id="7-konfigurasi">7. Konfigurasi<a class="headerlink" href="#7-konfigurasi" title="Permanent link">&para;</a></h2>
+<p>Tidak ada berkas konfigurasi sistem. Simpan skrip Anda di direktori kerja sendiri (misalnya <code>~/bin</code>), bukan di <code>/etc</code>.</p>
+<h2 id="8-verifikasi">8. Verifikasi<a class="headerlink" href="#8-verifikasi" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Skrip mengembalikan <code>exit=0</code> untuk host yang resolve dan <code>exit=1</code> untuk host yang tidak.</li>
+<li>Pesan galat muncul di stderr (coba <code>./cek.sh tidak-ada.invalid 2&gt;/dev/null</code> dan lihat tidak ada pesan galat).</li>
+<li><code>bash -n cek.sh</code> tidak mengeluarkan galat sintaks.</li>
+</ul>
+<h2 id="9-troubleshooting">9. Troubleshooting<a class="headerlink" href="#9-troubleshooting" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Gejala</th>
+<th>Penyebab</th>
+<th>Tindakan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Permission denied</code> saat menjalankan</td>
+<td>Belum <code>chmod +x</code></td>
+<td><code>chmod +x cek.sh</code></td>
+</tr>
+<tr>
+<td><code>unbound variable</code></td>
+<td>Variabel belum diisi dengan <code>-u</code> aktif</td>
+<td>Beri default <code>${VAR:-nilai}</code> atau isi variabel</td>
+</tr>
+<tr>
+<td>Skrip berhenti tanpa pesan</td>
+<td><code>-e</code> menghentikan pada perintah gagal</td>
+<td>Tambahkan pesan galat dan tangani kegagalan</td>
+</tr>
+<tr>
+<td>Spasi memecah argumen</td>
+<td>Variabel tak dikutip</td>
+<td>Kutip <code>"$var"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-security-review">10. Security Review<a class="headerlink" href="#10-security-review" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Kutip variabel dan hindari <code>eval</code>.</li>
+<li>Jangan menyimpan kredensial dalam skrip atau riwayat perintah.</li>
+<li>Skrip yang dijalankan dengan <code>sudo</code> harus dapat diubah hanya oleh root, atau pemilik berkas bisa menaikkan haknya.</li>
+</ul>
+<h2 id="11-latihan">11. Latihan<a class="headerlink" href="#11-latihan" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Ubah <code>cek.sh</code> agar menerima banyak argumen dan melaporkan semuanya.</li>
+<li>Tambahkan pemeriksaan bahwa <code>ss</code> tersedia sebelum dipakai.</li>
+<li>Tulis skrip yang mencetak "OK" jika disk root kurang dari 80% penuh (petunjuk: <code>df</code>).</li>
+</ol>
+<h2 id="12-assessment">12. Assessment<a class="headerlink" href="#12-assessment" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Apa arti exit status <code>0</code>?</li>
+<li>Apa fungsi <code>set -euo pipefail</code>?</li>
+<li>Mengapa variabel harus dikutip?</li>
+<li>Bagaimana mengirim pesan ke stderr?</li>
+</ol>
+<p><strong>Kunci singkat.</strong> (1) Sukses. (2) Berhenti saat gagal, tolak variabel kosong, dan pipeline gagal bila bagiannya gagal. (3) Mencegah pemecahan kata dan globbing. (4) <code>&gt;&amp;2</code>.</p>
+<h2 id="13-checklist-kelulusan">13. Checklist Kelulusan<a class="headerlink" href="#13-checklist-kelulusan" title="Permanent link">&para;</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Saya dapat menulis, menjalankan, dan menguji skrip kecil.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Saya menguji jalur sukses dan gagal.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Skrip saya tidak berisi kredensial.</li>
+</ul>
+<h2 id="14-referensi-resmi">14. Referensi Resmi<a class="headerlink" href="#14-referensi-resmi" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://www.gnu.org/software/bash/manual/bash.html">GNU Bash Reference Manual</a></li>
+<li><a href="https://www.shellcheck.net/">ShellCheck</a></li>
+<li><a href="https://documentation.ubuntu.com/server/">Dokumentasi Ubuntu Server</a></li>
+</ul>
+<hr />
+<p><a class="md-button" href="../../../#CH-02-01-05">Kembali ke dashboard kurikulum</a></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Kembali ke atas
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Tersalin ke clipboard", "clipboard.copy": "Salin ke clipboard", "search.result.more.one": "1 lagi di halaman ini", "search.result.more.other": "# lagi di halaman ini", "search.result.none": "Tidak ada dokumen yang sesuai", "search.result.one": "1 dokumen ditemukan", "search.result.other": "# dokumen ditemukan", "search.result.placeholder": "Ketik untuk mulai pencarian", "search.result.term.missing": "Tidak ada", "select.version": "Pilih versi"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

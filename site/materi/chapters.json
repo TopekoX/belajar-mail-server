@@ -1,0 +1,79 @@
+{
+  "chapters": {
+    "CH-01-01-01": {
+      "path": "chapter/CH-01-01-01/",
+      "title": "Peta Belajar dan Profil Pembelajar"
+    },
+    "CH-01-01-02": {
+      "path": "chapter/CH-01-01-02/",
+      "title": "Menyiapkan Lingkungan Lab (VM dan Snapshot)"
+    },
+    "CH-01-01-03": {
+      "path": "chapter/CH-01-01-03/",
+      "title": "Jalur Lab ke Produksi dan Etika Operasional"
+    },
+    "CH-02-01-01": {
+      "path": "chapter/CH-02-01-01/",
+      "title": "Konsep Linux dan Ubuntu Server"
+    },
+    "CH-02-01-02": {
+      "path": "chapter/CH-02-01-02/",
+      "title": "Navigasi Filesystem dan Hierarki Direktori"
+    },
+    "CH-02-01-03": {
+      "path": "chapter/CH-02-01-03/",
+      "title": "Pengguna, Grup, Izin, dan sudo"
+    },
+    "CH-02-01-04": {
+      "path": "chapter/CH-02-01-04/",
+      "title": "Manajemen Paket dengan APT"
+    },
+    "CH-02-01-05": {
+      "path": "chapter/CH-02-01-05/",
+      "title": "Dasar Shell Scripting"
+    },
+    "CH-02-02-01": {
+      "path": "chapter/CH-02-02-01/",
+      "title": "systemd dan Manajemen Service"
+    },
+    "CH-02-02-02": {
+      "path": "chapter/CH-02-02-02/",
+      "title": "Proses, Socket, dan Port Listening"
+    },
+    "CH-02-03-01": {
+      "path": "chapter/CH-02-03-01/",
+      "title": "Alamat IP, Subnet, Routing, dan Gateway"
+    },
+    "CH-02-03-02": {
+      "path": "chapter/CH-02-03-02/",
+      "title": "Resolusi DNS dan Alat Diagnosis"
+    },
+    "CH-02-03-03": {
+      "path": "chapter/CH-02-03-03/",
+      "title": "TCP/IP, Port, dan Firewall (UFW/nftables)"
+    },
+    "CH-02-03-04": {
+      "path": "chapter/CH-02-03-04/",
+      "title": "Diagnosis Koneksi dengan curl dan openssl"
+    },
+    "CH-02-04-01": {
+      "path": "chapter/CH-02-04-01/",
+      "title": "Administrasi Server dengan SSH"
+    },
+    "CH-03-01-01": {
+      "path": "chapter/CH-03-01-01/",
+      "title": "Siklus Hidup Email dan Peran MUA, MSA, MTA, MDA"
+    }
+  },
+  "levels": {
+    "CAT-01": {
+      "path": "level/L0/",
+      "title": "Level 0 — Orientasi dan Persiapan Belajar"
+    },
+    "CAT-02": {
+      "path": "level/L1/",
+      "title": "Level 1 — Dasar Linux dan Jaringan"
+    }
+  },
+  "schema": 1
+}

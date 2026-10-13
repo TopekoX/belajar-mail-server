@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kurikulum Mail Server dengan Ubuntu Server</title>
+<meta name="description" content="Portal kurikulum interaktif untuk membangun dan mengelola mail server dengan Ubuntu Server, Postfix, dan Dovecot: dari fundamental hingga production-grade.">
+<style>
+:root{--bg:#f6f8fa;--card:#fff;--card2:#eef1f4;--text:#1f2328;--muted:#59636e;--border:#d1d9e0;--accent:#0969da;--accent-t:#fff;--ok:#1a7f37;--warn:#9a6700;--danger:#cf222e;--s1:#0969da;--s2:#8250df;--s3:#9a6700;--s4:#1a7f37;--code:#f0f3f6;--sh:0 1px 2px rgba(0,0,0,.06);--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+:root[data-theme="dark"]{--bg:#0d1117;--card:#161b22;--card2:#1c232d;--text:#e6edf3;--muted:#9da7b3;--border:#30363d;--accent:#4493f8;--accent-t:#0d1117;--ok:#3fb950;--warn:#d29922;--danger:#f85149;--s1:#4493f8;--s2:#ab7df8;--s3:#d29922;--s4:#3fb950;--code:#0b0f14;--sh:none}
+:root{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+select option{background:var(--card);color:var(--text)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 var(--font)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:var(--accent);color:var(--accent-t);padding:8px 12px;z-index:100}
+.skip:focus{left:8px;top:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header.top{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header.top h1{font-size:16px;line-height:1.3;margin:0;flex:1 1 280px}
+header.top h1 small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.hmeta{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.lvl{font-size:13px;border:1px solid var(--border);border-radius:999px;padding:3px 10px;background:var(--card2);white-space:nowrap}
+.pbar{width:150px;height:10px;background:var(--card2);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.pbar>i{display:block;height:100%;background:var(--ok);width:0}
+.pct{font-weight:700;font-size:14px;min-width:42px}
+button,select,input[type=search]{font:inherit;color:var(--text)}
+.btn{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 11px;cursor:pointer}
+.btn:hover{background:var(--card2)}
+.btn.pri{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+.btn.dng{color:var(--danger);border-color:var(--danger)}
+.btn[aria-pressed=true]{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+#menuBtn{display:none}
+.layout{display:grid;grid-template-columns:350px minmax(0,1fr);align-items:start}
+aside.side{position:sticky;top:var(--hh,64px);height:calc(100vh - var(--hh,64px));overflow:auto;background:var(--card);border-right:1px solid var(--border);padding:12px}
+main{padding:22px clamp(14px,3vw,36px) 60px;max-width:1100px;outline:none}
+.fgroup{display:grid;gap:8px;margin-bottom:12px}
+.fgroup label{font-size:12.5px;color:var(--muted);display:block}
+.fgroup input,.fgroup select{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg)}
+.qf{display:flex;gap:6px;flex-wrap:wrap}
+.qf .btn{font-size:13px}
+.rc{font-size:12.5px;color:var(--muted)}
+ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+.tree .tg{width:100%;text-align:left;background:none;border:0;padding:6px 4px;cursor:pointer;display:flex;gap:6px;align-items:flex-start;border-radius:6px}
+.tree .tg:hover{background:var(--card2)}
+.chev{display:inline-block;transition:transform .15s;flex:none;width:14px;color:var(--muted)}
+.tg[aria-expanded=true] .chev{transform:rotate(90deg)}
+.tree .cat>.tg{font-weight:650}
+.tree .mod{margin-left:12px}
+.tree .mod>.tg{font-weight:550;font-size:14px}
+.tree .cnt{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.tree ul[hidden]{display:none}
+.tree .chl{display:flex;gap:8px;padding:4px 6px 4px 26px;text-decoration:none;color:var(--text);font-size:13.5px;border-radius:6px;line-height:1.4}
+.tree .chl:hover{background:var(--card2)}
+.tree .chl.active{background:var(--accent);color:var(--accent-t)}
+.tree .chl.active .sg{color:inherit}
+.tree .catp{display:block;padding:3px 6px 3px 22px;font-size:13px}
+.sg{flex:none;width:1.1em;text-align:center}
+.s0{color:var(--muted)}.s1{color:var(--s1)}.s2{color:var(--s2)}.s3{color:var(--s3)}.s4{color:var(--s4)}
+details.prog{margin-top:16px;border-top:1px solid var(--border);padding-top:10px}
+details.prog summary{cursor:pointer;font-weight:600}
+.warnbox{background:color-mix(in srgb,var(--warn) 14%,var(--card));border:1px solid var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0}
+.infobox{background:color-mix(in srgb,var(--accent) 10%,var(--card));border:1px solid var(--accent);border-radius:8px;padding:10px 14px;margin:12px 0}
+.crumbs ol{list-style:none;padding:0;margin:0 0 10px;display:flex;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.crumbs li+li::before{content:"/";margin-right:6px}
+h2.pt{font-size:26px;line-height:1.25;margin:4px 0 8px}
+h2{font-size:19px;margin:0 0 8px}
+h3{font-size:16px;margin:14px 0 6px}
+.sec{scroll-margin-top:calc(var(--hh,64px) + 8px);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:14px 0;box-shadow:var(--sh)}
+.sec>h2 .n{color:var(--muted);font-weight:500;margin-right:6px}
+.badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:1px 9px;background:var(--card2);margin:0 4px 4px 0;white-space:nowrap}
+.badge.s1{border-color:var(--s1)}.badge.s2{border-color:var(--s2)}.badge.s3{border-color:var(--s3)}.badge.s4{border-color:var(--s4)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.metrics div{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.metrics dt{font-size:12.5px;color:var(--muted)}
+.metrics dd{margin:0;font-size:22px;font-weight:700}
+.metrics dd small{font-size:13px;font-weight:500;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--border);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--card2)}
+.tw{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0}
+.meta div{background:var(--card2);border-radius:8px;padding:6px 10px;font-size:13.5px}
+.meta b{display:block;font-size:12px;color:var(--muted);font-weight:500}
+ul.cl{list-style:none;padding:0;margin:6px 0}
+ul.cl li{padding:3px 0}
+ul.cl label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+ul.cl input{margin-top:5px;width:16px;height:16px;flex:none}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.toc a{font-size:12.5px;border:1px solid var(--border);border-radius:999px;padding:1px 9px;text-decoration:none;background:var(--card)}
+code.i{font-family:var(--mono);font-size:13px;background:var(--code);border:1px solid var(--border);border-radius:4px;padding:0 5px;white-space:nowrap;display:inline-block;margin:1px 2px}
+figure.code{margin:10px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--code)}
+figure.code figcaption{display:flex;gap:10px;align-items:center;padding:5px 10px;background:var(--card2);border-bottom:1px solid var(--border);font-size:12.5px}
+figure.code .tag{font-weight:700}
+figure.code.root .tag{color:var(--danger)}
+figure.code.user .tag{color:var(--ok)}
+figure.code.config .tag{color:var(--accent)}
+figure.code .lbl{color:var(--muted);flex:1;font-family:var(--mono)}
+figure.code .copy{font-size:12px;padding:1px 8px}
+figure.code pre{margin:0;padding:10px 12px;overflow:auto;font:13px/1.5 var(--mono)}
+.ph{background:color-mix(in srgb,var(--warn) 25%,transparent);border-radius:3px;padding:0 2px}
+details.note{border:1px solid var(--border);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card2)}
+details.note summary{cursor:pointer;font-weight:600}
+.bar{height:8px;background:var(--card2);border:1px solid var(--border);border-radius:999px;overflow:hidden;min-width:70px}
+.bar>i{display:block;height:100%;background:var(--ok)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;z-index:60;display:none;max-width:90vw}
+svg.diag{width:100%;height:auto;max-width:900px}
+svg.diag rect{fill:var(--card2);stroke:var(--border);stroke-width:1.5}
+svg.diag rect.hi{stroke:var(--accent);stroke-width:2}
+svg.diag text{fill:var(--text);font:600 13px var(--font);text-anchor:middle}
+svg.diag text.sm{font-weight:400;font-size:11.5px;fill:var(--muted)}
+svg.diag path{stroke:var(--muted);stroke-width:2;fill:none}
+svg.diag marker path{fill:var(--muted);stroke:none}
+footer{padding:14px 20px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+@media (max-width:900px){
+ #menuBtn{display:inline-block}
+ .layout{display:block}
+ aside.side{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(92vw,380px);z-index:40;transform:translateX(-102%);visibility:hidden;transition:transform .2s,visibility 0s .2s;padding-top:60px}
+ body.nav-open aside.side{transform:none;visibility:visible;transition:transform .2s,visibility 0s}
+ body.nav-open::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:35}
+ body.nav-open aside.side{z-index:45}
+ .pbar{width:100px}
+}
+@media print{
+ header.top .hmeta .btn,#menuBtn,aside.side,.noprint,footer,.pager,.toc{display:none!important}
+ .layout{display:block}body{background:#fff;color:#000}
+ .sec{break-inside:avoid;box-shadow:none}
+}
+</style>
+<script>
+/* Terapkan tema sebelum render pertama agar tidak berkedip. Nilai tersimpan divalidasi. */
+(function(){var t=null;try{t=localStorage.getItem("kmu-theme");}catch(e){}
+if(t!=="dark"&&t!=="light")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";
+document.documentElement.setAttribute("data-theme",t);})();
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Lewati ke konten utama</a>
+<header class="top" id="top">
+  <button class="btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="side">☰ Menu</button>
+  <h1>Kurikulum Lengkap Membangun dan Mengelola Mail Server dengan Ubuntu Server<small>Dari Fundamental hingga Production-Grade · Postfix · Dovecot · Roundcube · Rspamd</small></h1>
+  <div class="hmeta">
+    <span class="lvl" id="hLevel">Level —</span>
+    <span class="pct" id="hPct">0%</span>
+    <div class="pbar" id="hBar" role="progressbar" aria-label="Progres kurikulum (chapter wajib)" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+    <a class="btn" href="#/tentang">Panduan</a>
+    <a class="btn" href="materi/">Materi</a>
+    <button class="btn" id="themeBtn" type="button" aria-pressed="false">Mode gelap</button>
+  </div>
+</header>
+<div class="layout">
+<aside class="side" id="side" aria-label="Navigasi kurikulum">
+  <div class="fgroup" role="search">
+    <div><label for="fq">Cari chapter (judul, ID, kata kunci)</label><input id="fq" type="search" autocomplete="off" placeholder="mis. postfix, dkim, backup"></div>
+    <div><label for="fcat">Filter kategori</label><select id="fcat"></select></div>
+    <div><label for="fst">Filter status</label><select id="fst"></select></div>
+    <div class="qf">
+      <button class="btn" type="button" id="qInc" aria-pressed="false">Belum selesai</button>
+      <button class="btn" type="button" id="qReady" aria-pressed="false">Siap dipelajari</button>
+      <button class="btn" type="button" id="qClear">Hapus filter</button>
+    </div>
+    <div class="rc" id="rc" aria-live="polite"></div>
+  </div>
+  <nav aria-label="Daftar kategori, modul, dan chapter"><ul class="tree" id="tree"></ul></nav>
+  <details class="prog">
+    <summary>Data progres belajar</summary>
+    <p class="warnbox">Progres disimpan di localStorage browser ini saja. Data dapat hilang jika penyimpanan browser dibersihkan atau Anda memakai mode privat. Ekspor JSON secara berkala. Hanya status belajar yang disimpan, tanpa kredensial atau data server.</p>
+    <div class="qf">
+      <button class="btn" type="button" id="expBtn">Ekspor JSON</button>
+      <button class="btn" type="button" id="impBtn">Impor JSON</button>
+      <button class="btn dng" type="button" id="rstBtn">Reset progres</button>
+    </div>
+    <input type="file" id="impFile" accept="application/json,.json" hidden>
+  </details>
+</aside>
+<main id="main" tabindex="-1" aria-live="off"></main>
+</div>
+<footer>Status chapter adalah alat pelacak belajar dan <strong>bukan</strong> indikator kesiapan teknis server nyata. Kesiapan produksi hanya ditentukan oleh checklist go-live dan validasi teknis. Portal ini tidak mengirim data apa pun ke layanan eksternal dan tidak mengeksekusi perintah apa pun.</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="routeAnn" class="sr" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px">Portal ini membutuhkan JavaScript untuk menampilkan kurikulum dan melacak progres.</p></noscript>
+
+<script>
+"use strict";
+/*DATA-START*/
+const APP="kurikulum-mail-server-ubuntu";
+const REL="Ubuntu Server 24.04 LTS (Noble Numbat)";
+const REFS={ubuntu:["Dokumentasi Ubuntu Server","https://documentation.ubuntu.com/server/"],packages:["Paket Ubuntu","https://packages.ubuntu.com/"],postfix:["Dokumentasi Postfix","https://www.postfix.org/documentation.html"],dovecot:["Dokumentasi Dovecot","https://doc.dovecot.org/"],roundcube:["Roundcube","https://roundcube.net/"],le:["Dokumentasi Let's Encrypt","https://letsencrypt.org/docs/"],rspamd:["Dokumentasi Rspamd","https://docs.rspamd.com/"],rfc:["RFC Editor","https://www.rfc-editor.org/"]};
+const STATUS=["Belum Dimulai","Sedang Dipelajari","Praktik Berjalan","Menunggu Validasi","Selesai"];
+const GLYPH=["○","◔","◑","◕","●"];
+const ENV={lab:"Lab lokal (VM)",dom:"Lab + domain yang Anda kendalikan",pub:"Uji publik (VPS, IP publik, domain)",prod:"Produksi"};
+
+/* Format chapter: [judul, menit, [tujuan...], "perintah, alat | berkas, direktif"]. Tanpa alat = chapter konseptual. */
+const CATS=[
+{n:"Orientasi dan Persiapan Belajar",lv:0,env:"lab",
+ obj:["Memahami struktur kurikulum dan cara memakai portal ini","Menyiapkan lab VM yang aman dan dapat dipulihkan","Memahami batas antara lab, uji publik, dan produksi"],
+ dl:"Rencana belajar pribadi, VM lab kosong beserta snapshot, ringkasan kriteria transisi antar lingkungan",
+ crit:"VM lab siap dan snapshot awal terbukti dapat dipulihkan; ringkasan batas lingkungan dan etika operasional sudah ditulis.",
+ sec:"Pisahkan lab dari jaringan produksi dan jangan menyimpan kredensial nyata di catatan belajar.",
+ ts:["Virtualisasi tidak aktif di BIOS/UEFI","Sumber daya host tidak mencukupi","VM tidak dapat dijangkau dari host"],
+ mods:[{t:"Orientasi Kurikulum",after:[],refs:["ubuntu"],chs:[
+  ["Peta Belajar dan Profil Pembelajar",60,["Menilai kemampuan awal terhadap kompetensi yang dibutuhkan","Menyusun rencana belajar mingguan yang realistis"],""],
+  ["Menyiapkan Lingkungan Lab (VM dan Snapshot)",120,["Membuat VM lab dengan sumber daya yang memadai","Membuat dan memulihkan snapshot sebelum perubahan besar"],"hypervisor (VirtualBox, KVM, atau VMware), ISO Ubuntu Server"],
+  ["Jalur Lab ke Produksi dan Etika Operasional",60,["Menjelaskan mengapa uji lokal yang berhasil belum berarti siap produksi","Memahami kebijakan abuse dan tanggung jawab operator email"],""]]}]},
+
+{n:"Dasar Linux dan Jaringan",lv:1,env:"lab",
+ obj:["Mengoperasikan Ubuntu Server melalui command line secara aman","Mengelola paket, pengguna, izin, dan service dengan systemd","Memahami IP, routing, DNS resolution, TCP/IP, firewall, dan mendiagnosisnya"],
+ dl:"Skrip diagnostik dasar dan laporan baseline jaringan server lab",
+ crit:"Learner dapat mengelola service, user, paket, dan firewall via CLI serta mendiagnosis koneksi dengan ip, ss, dig, curl, dan openssl.",
+ sec:"Terapkan least privilege sejak awal: gunakan sudo seperlunya, hindari login root, dan batasi port yang terbuka.",
+ ts:["Salah izin atau kepemilikan berkas","Service gagal start","DNS tidak resolve","Terkunci keluar dari SSH akibat aturan firewall"],
+ mods:[
+ {t:"Command Line dan Administrasi Dasar",after:["01-01"],refs:["ubuntu"],chs:[
+  ["Konsep Linux dan Ubuntu Server",60,["Menjelaskan peran kernel, userspace, dan distribusi","Membedakan rilis LTS dan non-LTS"],""],
+  ["Navigasi Filesystem dan Hierarki Direktori",90,["Menavigasi filesystem dan memahami FHS","Mencari berkas dan mengelolanya dengan aman"],"pwd, ls, cd, find, cp, mv|/etc, /var, /srv"],
+  ["Pengguna, Grup, Izin, dan sudo",120,["Mengelola user dan grup","Menetapkan izin dan kepemilikan dengan prinsip least privilege"],"adduser, usermod, chmod, chown, sudo, visudo|/etc/sudoers.d"],
+  ["Manajemen Paket dengan APT",90,["Memasang, memperbarui, dan menghapus paket","Memeriksa versi dan asal paket"],"apt, apt-cache policy, dpkg|/etc/apt/sources.list.d"],
+  ["Dasar Shell Scripting",150,["Menulis skrip bash sederhana yang aman","Memakai variabel, kondisi, loop, dan exit status"],"bash, test, shellcheck (opsional)"]]},
+ {t:"Service dan Proses",after:["02-01"],refs:["ubuntu"],chs:[
+  ["systemd dan Manajemen Service",90,["Mengelola siklus hidup service dengan systemctl","Membaca log service dengan journalctl"],"systemctl, journalctl|/etc/systemd/system"],
+  ["Proses, Socket, dan Port Listening",90,["Mengidentifikasi proses dan socket yang listening","Menghubungkan port terbuka dengan service pemiliknya"],"ps, top, ss, lsof"]]},
+ {t:"Jaringan",after:["02-02"],refs:["ubuntu","rfc"],chs:[
+  ["Alamat IP, Subnet, Routing, dan Gateway",120,["Menghitung subnet dan memahami routing","Membaca konfigurasi jaringan dengan ip"],"ip addr, ip route"],
+  ["Resolusi DNS dan Alat Diagnosis",120,["Menjelaskan alur resolusi nama","Memakai dig, host, dan getent untuk diagnosis"],"dig, host, getent, resolvectl|/etc/resolv.conf, /etc/hosts"],
+  ["TCP/IP, Port, dan Firewall (UFW/nftables)",150,["Memahami port, protokol, dan state koneksi","Menerapkan kebijakan firewall deny-by-default tanpa mengunci diri"],"ufw, nft, ss"],
+  ["Diagnosis Koneksi dengan curl dan openssl",90,["Menguji konektivitas TCP dan TLS dari command line","Membaca hasil handshake TLS secara dasar"],"curl, openssl s_client, nc"]]},
+ {t:"SSH",after:["02-03"],refs:["ubuntu"],chs:[
+  ["Administrasi Server dengan SSH",120,["Mengakses server dengan kunci SSH","Menyalin berkas dan menjalankan perintah jarak jauh dengan aman"],"ssh, ssh-keygen, scp|~/.ssh/authorized_keys"]]}]},
+
+{n:"Fundamental Arsitektur Email",lv:2,env:"lab",
+ obj:["Menjelaskan siklus hidup email dari pengirim hingga mailbox","Membedakan MUA, MSA, MTA, MDA, serta protokol SMTP, IMAP, dan POP3","Memahami routing berbasis MX, antrian, bounce, dan log"],
+ dl:"Diagram arsitektur email buatan sendiri dan catatan analisis satu pesan (envelope, header, MIME)",
+ crit:"Learner dapat menggambar dan menjelaskan alur pengiriman email serta membedakan envelope dan header pada pesan nyata.",
+ sec:"Pahami bahwa SMTP awalnya tidak mengautentikasi pengirim; inilah akar spoofing dan alasan perlunya SPF, DKIM, dan DMARC.",
+ ts:["Salah membedakan relay dan submission","Bingung antara kegagalan routing dan kegagalan autentikasi","Salah membaca header Received"],
+ mods:[
+ {t:"Model dan Protokol Email",after:["02-03"],refs:["rfc"],chs:[
+  ["Siklus Hidup Email dan Peran MUA, MSA, MTA, MDA",90,["Menjelaskan jalur pesan dari klien hingga mailbox","Membedakan peran setiap komponen"],""],
+  ["Protokol SMTP, ESMTP, IMAP, dan POP3",120,["Menjelaskan perintah dan kode respons SMTP","Membandingkan IMAP dan POP3"],"nc, openssl s_client (mengamati sesi protokol)"],
+  ["Envelope vs Header, MIME, dan Lampiran",90,["Membedakan MAIL FROM/RCPT TO dari header From/To","Menjelaskan struktur MIME dan lampiran"],""]]},
+ {t:"Routing dan Pengiriman",after:["03-01"],refs:["rfc","postfix"],chs:[
+  ["Lookup MX dan Routing SMTP",90,["Menelusuri jalur routing dengan record MX","Menjelaskan prioritas MX dan fallback ke A/AAAA"],"dig MX, dig A"],
+  ["Antrian, Deferred, Retry, Bounce, dan DSN",90,["Menjelaskan status pesan dalam antrian","Membaca delivery status notification"],""],
+  ["Format Mailbox, Message-ID, dan Log Email",90,["Membedakan mbox dan Maildir","Melacak pesan lewat Message-ID di log"],""],
+  ["Mengirim, Menerima, Relay, dan Mengambil Email",60,["Membedakan sending, receiving, relaying, dan retrieving","Memetakan setiap fungsi ke port dan layanan"],""]]}]},
+
+{n:"Persiapan Ubuntu Server",lv:3,env:"lab",
+ obj:["Merencanakan dan memasang Ubuntu Server LTS","Mengonfigurasi jaringan, hostname, FQDN, waktu, dan storage","Menerapkan baseline keamanan dan health check awal"],
+ dl:"Server Ubuntu berbasis baseline: IP statis, FQDN, SSH berbasis kunci, firewall aktif, skrip health check",
+ crit:"Server lab lolos baseline health check: waktu sinkron, hostname/FQDN benar, SSH kunci saja, firewall aktif, update terpasang.",
+ sec:"Baseline ini adalah fondasi: SSH hanya dengan kunci, firewall deny-by-default, pembaruan keamanan otomatis, dan pengguna admin non-root.",
+ ts:["Netplan salah sintaks dan jaringan putus","Hostname tidak cocok dengan FQDN","Jam tidak sinkron","Terkunci keluar dari SSH"],
+ mods:[
+ {t:"Perencanaan dan Instalasi",after:["03-02","02-04"],refs:["ubuntu","packages"],chs:[
+  ["Perencanaan Hardware, VM, dan Sizing",60,["Menghitung kebutuhan CPU, RAM, disk, dan IOPS awal","Mendokumentasikan asumsi kapasitas"],""],
+  ["Instalasi Ubuntu Server LTS dan Pembaruan",120,["Memasang Ubuntu Server dan membuat user admin","Memperbarui sistem dan mencatat versi terpasang"],"apt update, apt full-upgrade, lsb_release"]]},
+ {t:"Konfigurasi Dasar",after:["04-01"],refs:["ubuntu"],chs:[
+  ["IP Statis dan Validasi Jaringan (Netplan)",90,["Mengonfigurasi IP statis dengan Netplan","Memvalidasi gateway dan DNS"],"netplan try, netplan apply, ip, ping|/etc/netplan/*.yaml"],
+  ["Hostname, FQDN, Timezone, dan Sinkronisasi Waktu",90,["Menetapkan hostname dan FQDN yang konsisten","Memastikan waktu tersinkronisasi"],"hostnamectl, timedatectl, chronyc|/etc/hosts, /etc/hostname"],
+  ["Perencanaan Storage dan Izin Filesystem",90,["Merencanakan partisi atau volume untuk data mail","Menetapkan izin direktori yang aman"],"lsblk, df, du, mount|/etc/fstab"]]},
+ {t:"Baseline Keamanan Awal",after:["04-02"],refs:["ubuntu"],chs:[
+  ["SSH Aman dan Firewall Awal",120,["Menerapkan SSH berbasis kunci","Mengaktifkan firewall tanpa mengunci diri"],"ssh, ufw, sshd -t|/etc/ssh/sshd_config.d/"],
+  ["Hardening Awal dan Pembaruan Otomatis",90,["Mengaktifkan pembaruan keamanan otomatis","Menonaktifkan layanan yang tidak diperlukan"],"unattended-upgrades, systemctl list-unit-files|/etc/apt/apt.conf.d/"],
+  ["Pemeriksaan Kesehatan Baseline",60,["Menyusun skrip health check dasar","Mendokumentasikan kondisi baseline"],"df, free, systemctl --failed, journalctl -p err"]]}]},
+
+{n:"Domain dan Infrastruktur DNS",lv:4,env:"dom",
+ obj:["Menjelaskan fungsi record DNS untuk routing dan autentikasi email","Mengonfigurasi A/AAAA, MX, dan PTR beserta FCrDNS","Mendiagnosis kesalahan DNS umum"],
+ dl:"Tabel rencana record DNS domain, hasil verifikasi dig, dan catatan troubleshooting DNS",
+ crit:"Record A/AAAA, MX, dan PTR konsisten (FCrDNS) dan terverifikasi dari minimal dua resolver; perbedaan record routing dan autentikasi dapat dijelaskan.",
+ sec:"Amankan akun registrar dan DNS (MFA); kendalikan siapa yang boleh mengubah record. DNS yang salah dapat mengalihkan atau membocorkan email.",
+ ts:["MX menunjuk ke CNAME atau host tanpa A/AAAA","PTR tidak cocok dengan A","Propagasi dan TTL membingungkan","Typo pada TXT"],
+ mods:[
+ {t:"Fondasi DNS untuk Email",after:["04-03"],refs:["rfc","ubuntu"],chs:[
+  ["Registrasi Domain dan Hosting DNS",60,["Memilih registrar dan DNS hosting yang aman","Memahami syarat domain terkendali untuk produksi"],""],
+  ["Record A, AAAA, dan MX",90,["Membuat dan memverifikasi record A/AAAA dan MX","Menjelaskan prioritas MX"],"dig A, dig AAAA, dig MX"],
+  ["PTR, Reverse DNS, dan FCrDNS",90,["Menjelaskan reverse DNS dan forward-confirmed reverse DNS","Memverifikasi kesesuaian PTR dan A"],"dig -x, host"],
+  ["TTL, Propagasi, dan Cache DNS",60,["Menjelaskan TTL dan strategi perubahan DNS","Memverifikasi record pada beberapa resolver"],"dig @resolver, dig +trace"]]},
+ {t:"DNS Autentikasi dan Troubleshooting",after:["05-01"],refs:["rfc"],chs:[
+  ["Record Autentikasi: SPF, DKIM, DMARC (Publikasi DNS)",90,["Membedakan record routing dari record autentikasi","Menjelaskan posisi TXT SPF, DKIM, dan DMARC di DNS"],"dig TXT"],
+  ["DNSSEC dan Split-Horizon DNS",90,["Menjelaskan konsep dan pertimbangan operasional DNSSEC","Mengenali kapan split-horizon relevan"],"dig +dnssec, delv"],
+  ["Kesalahan Umum dan Troubleshooting DNS",90,["Mendiagnosis kesalahan record MX, PTR, dan TXT","Menyusun checklist verifikasi DNS"],"dig, host, resolvectl"]]}]},
+
+{n:"Instalasi Inti Mail Server (Postfix dan Dovecot)",lv:5,env:"lab",
+ obj:["Memasang dan mengonfigurasi Postfix sebagai MTA yang aman","Memasang Dovecot untuk IMAP, POP3, autentikasi, dan LMTP","Mencegah open relay dan mengelola antrian serta log"],
+ dl:"Server Postfix + Dovecot lokal yang mengirim dan menerima email, konfigurasi terdokumentasi, bukti uji relay ditolak",
+ crit:"Pesan uji lokal terkirim dan terbaca via IMAP; uji relay dari klien tidak terautentikasi ditolak; postfix check dan doveconf -n tanpa error.",
+ sec:"Pembatasan relay adalah kontrol keamanan utama: validasi dengan uji nyata bahwa server bukan open relay sebelum terhubung ke jaringan publik.",
+ ts:["Postfix gagal start karena main.cf salah","Pesan stuck di antrian","Dovecot menolak login","Izin Maildir salah"],
+ mods:[
+ {t:"Postfix",after:["05-02"],refs:["postfix","ubuntu"],chs:[
+  ["Arsitektur Postfix dan Instalasi",90,["Menjelaskan komponen dan alur proses Postfix","Memasang Postfix dan memeriksa statusnya"],"apt install postfix, postconf -n, systemctl status postfix"],
+  ["main.cf, master.cf, dan Identitas Server",120,["Mengonfigurasi myhostname, mydomain, dan myorigin","Memvalidasi dan me-reload konfigurasi dengan aman"],"postconf, postfix check, postfix reload|/etc/postfix/main.cf, /etc/postfix/master.cf, myhostname, mydomain, myorigin"],
+  ["Antarmuka, Jaringan Tepercaya, dan Delivery Lokal",90,["Menetapkan inet_interfaces dan mynetworks yang ketat","Membedakan local delivery dan virtual mailbox delivery"],"postconf -n|inet_interfaces, mynetworks, mydestination, home_mailbox"],
+  ["Pembatasan Relay dan Pencegahan Open Relay",120,["Menerapkan smtpd_relay_restrictions dan recipient restrictions","Membuktikan server bukan open relay lewat uji"],"postconf, swaks (opsional)|smtpd_relay_restrictions, smtpd_recipient_restrictions"],
+  ["Alias, Address Rewriting, dan Transport Maps",120,["Mengelola alias dan pemetaan alamat","Memakai transport maps dan pembatasan pengirim secara terkontrol"],"newaliases, postmap|/etc/aliases, transport_maps, canonical_maps"],
+  ["Manajemen Antrian dan Analisis Log",120,["Memeriksa dan mengelola antrian secara aman","Menganalisis log mail untuk deferred dan bounce"],"postqueue -p, postcat, postsuper, journalctl -u postfix|/var/log/mail.log"]]},
+ {t:"Dovecot",after:["06-01"],refs:["dovecot","ubuntu"],chs:[
+  ["Arsitektur Dovecot, Maildir, dan Izin",90,["Menjelaskan komponen Dovecot dan Maildir","Menetapkan lokasi mailbox dan izin yang benar"],"doveconf -n, apt install dovecot-imapd|/etc/dovecot/conf.d/10-mail.conf"],
+  ["Konfigurasi IMAP dan POP3",90,["Mengaktifkan protokol IMAP dan POP3 secara terkontrol","Menguji akses mailbox"],"doveadm, openssl s_client|/etc/dovecot/dovecot.conf"],
+  ["Autentikasi: Sistem vs Virtual User dan SASL dengan Postfix",150,["Membandingkan system user dan virtual user","Mengintegrasikan SMTP AUTH Postfix dengan Dovecot SASL"],"doveadm pw, doveadm auth test|/etc/dovecot/conf.d/10-auth.conf, smtpd_sasl_type"],
+  ["Integrasi LMTP Postfix dan Dovecot",90,["Mengonfigurasi pengiriman lokal via LMTP","Memverifikasi alur delivery lewat log"],"postconf, doveadm log find|virtual_transport, /etc/dovecot/conf.d/10-master.conf"]]}]},
+
+{n:"Mailbox dan Konfigurasi Klien Email",lv:6,env:"lab",
+ obj:["Menyediakan virtual domain dan mailbox","Mengelola siklus hidup akun dan quota","Mengonfigurasi klien desktop dan mobile serta mendiagnosis akses"],
+ dl:"Dua akun virtual berfungsi, prosedur provisioning tertulis, bukti klien sinkron di minimal dua perangkat",
+ crit:"Mailbox virtual dapat dibuat, dinonaktifkan, dan dihapus mengikuti prosedur; klien menyinkronkan folder dengan benar; quota teruji.",
+ sec:"Simpan password hanya dalam bentuk hash yang kuat; jangan pernah mencatat password nyata sebagai bukti.",
+ ts:["Klien menolak sertifikat","Folder tidak sinkron","Login gagal karena skema hash","Quota penuh menolak pesan"],
+ mods:[
+ {t:"Provisioning Mailbox",after:["06-02"],refs:["postfix","dovecot"],chs:[
+  ["Virtual Domain dan Virtual Mailbox",150,["Mengonfigurasi virtual mailbox domain di Postfix","Menyediakan user vmail dan penyimpanan mailbox"],"postmap, doveadm user|virtual_mailbox_domains, virtual_mailbox_maps, /etc/dovecot/users"],
+  ["Akun Sistem vs Virtual User: Trade-off",60,["Membandingkan keunggulan dan risiko kedua model","Memilih model berdasarkan skenario"],""],
+  ["Siklus Hidup Akun: Buat, Suspend, Hapus, Ganti Password",120,["Menjalankan prosedur provisioning dan penghapusan akun","Mengganti password dan memulihkan akses dengan aman"],"doveadm pw, doveadm user, doveadm mailbox"],
+  ["Quota Mailbox",90,["Mengaktifkan dan menguji quota","Memantau konsumsi storage per akun"],"doveadm quota get|/etc/dovecot/conf.d/90-quota.conf"]]},
+ {t:"Klien Email",after:["07-01"],refs:["dovecot"],chs:[
+  ["Konfigurasi Thunderbird dan Klien Desktop",60,["Mengonfigurasi akun IMAP dan SMTP di klien desktop","Memeriksa sinkronisasi folder"],""],
+  ["Konfigurasi Android dan iOS",60,["Mengonfigurasi akun pada klien mobile","Mengenali perbedaan perilaku klien"],""],
+  ["Troubleshooting Akses Mailbox dan Log Autentikasi",90,["Membaca log autentikasi Dovecot","Mendiagnosis kegagalan login, sertifikat, dan sinkronisasi"],"journalctl -u dovecot, doveadm log find, openssl s_client"]]}]},
+
+{n:"TLS dan Autentikasi Email",lv:7,env:"dom",
+ obj:["Menerapkan TLS yang benar untuk SMTP dan IMAP","Menerapkan SPF, DKIM, dan DMARC","Menguji autentikasi email dengan aman dan realistis"],
+ dl:"Sertifikat valid dengan perpanjangan otomatis, submission 587/465, IMAPS 993, SPF/DKIM/DMARC terpublikasi, hasil pembacaan Authentication-Results",
+ crit:"Sertifikat valid dan perpanjangan dry-run lolos; submission dan IMAPS memaksa TLS; header Authentication-Results menunjukkan SPF dan DKIM pass pada pesan uji. Hasil ini tidak menjamin inbox.",
+ sec:"Jangan melemahkan TLS demi kompatibilitas tanpa dasar; lindungi kunci privat DKIM dan sertifikat dengan izin ketat; SPF/DKIM/DMARC bukan jaminan inbox placement.",
+ ts:["Sertifikat kedaluwarsa atau rantai tidak lengkap","SPF melebihi 10 DNS lookup","DKIM selector tidak ditemukan","DMARC gagal akibat alignment"],
+ mods:[
+ {t:"TLS dan Port Layanan",after:["07-02"],refs:["le","postfix","dovecot"],chs:[
+  ["Sertifikat TLS dan Trust Chain",90,["Menjelaskan sertifikat, CA, dan rantai kepercayaan","Memeriksa sertifikat dengan openssl"],"openssl x509, openssl s_client"],
+  ["Let's Encrypt, Certbot, dan Perpanjangan Otomatis",120,["Menerbitkan sertifikat dan memahami syarat validasi","Memverifikasi perpanjangan otomatis"],"certbot, systemctl list-timers|/etc/letsencrypt/live/"],
+  ["Submission 587/465 dan IMAPS 993",150,["Membedakan STARTTLS dan implicit TLS","Mengaktifkan submission terautentikasi dan IMAPS"],"openssl s_client, postconf -M|/etc/postfix/master.cf, smtpd_tls_*, ssl_cert"],
+  ["Protokol TLS, Cipher, dan Monitoring Kedaluwarsa",90,["Menetapkan versi TLS dan cipher yang masuk akal","Memantau tanggal kedaluwarsa sertifikat"],"openssl s_client, openssl x509 -enddate"]]},
+ {t:"Autentikasi Email",after:["08-01"],refs:["rfc","rspamd"],chs:[
+  ["SPF: Sintaks dan Keterbatasan",90,["Menulis dan memvalidasi record SPF","Memahami keterbatasan SPF (forwarding, lookup limit)"],"dig TXT"],
+  ["DKIM: Signing dan Rotasi Selector",150,["Membuat kunci dan menandatangani pesan keluar","Merencanakan rotasi selector"],"dig TXT, opendkim-genkey (atau signing Rspamd; dipilih saat implementasi)"],
+  ["DMARC: Alignment dan Progres Kebijakan",120,["Menjelaskan alignment SPF dan DKIM","Merencanakan progres policy none, quarantine, reject"],"dig TXT"],
+  ["Authentication-Results dan Pengujian Aman",90,["Membaca header Authentication-Results","Menguji autentikasi tanpa membahayakan reputasi"],"dig TXT, inspeksi header"]]}]},
+
+{n:"Webmail dan Layanan Pendukung",lv:8,env:"lab",
+ obj:["Memasang Roundcube di atas web server, PHP, dan database yang didukung","Mengamankan webmail dengan HTTPS dan sesi yang aman","Mengelola lampiran, backup, dan upgrade webmail"],
+ dl:"Webmail Roundcube berjalan di HTTPS, terintegrasi IMAP/SMTP, dengan prosedur backup dan upgrade",
+ crit:"Login webmail via HTTPS berhasil, kirim dan terima email berfungsi, batas lampiran sesuai, backup teruji.",
+ sec:"Webmail menambah permukaan serangan: wajib HTTPS, perbarui rutin, batasi akses admin, dan lindungi sesi.",
+ ts:["Error 500 akibat modul PHP","Gagal login IMAP dari Roundcube","Sertifikat tidak cocok","Upload lampiran terblokir batas PHP"],
+ mods:[
+ {t:"Roundcube (Opsional, Direkomendasikan)",after:["08-02"],opt:true,refs:["roundcube","ubuntu"],chs:[
+  ["Web Server, PHP, dan Database untuk Webmail",120,["Menyiapkan web server, PHP-FPM, dan database","Memahami dependensi Roundcube"],"apt, systemctl, php -v|/etc/nginx/ atau /etc/apache2/"],
+  ["Instalasi Roundcube dan Integrasi IMAP/SMTP",150,["Memasang Roundcube dan menghubungkannya ke Dovecot/Postfix","Memverifikasi login dan pengiriman"],"apt, journalctl|/etc/roundcube/config.inc.php"],
+  ["HTTPS, Keamanan Browser, dan Sesi Login",90,["Mengaktifkan HTTPS dan header keamanan","Mengamankan sesi login"],"curl -I, openssl s_client"],
+  ["Batas Lampiran, Backup, dan Upgrade Webmail",90,["Menyelaraskan batas lampiran PHP, web server, dan Postfix","Membuat prosedur backup dan upgrade"],"php -i, postconf message_size_limit|/etc/php/*/fpm/php.ini"]]}]},
+
+{n:"Security Hardening dan Threat Defense",lv:9,env:"lab",
+ obj:["Menerapkan kontrol preventif, detektif, dan korektif","Menerapkan filtering spam, malware, dan anti-phishing","Menjaga integritas log, patch, dan backup terenkripsi"],
+ dl:"Matriks kontrol keamanan (preventif, detektif, korektif) dengan bukti verifikasi, konfigurasi Rspamd dan Fail2ban terdokumentasi",
+ crit:"Setiap kontrol memiliki prosedur verifikasi efektivitas yang berhasil dijalankan; uji brute-force, relay, dan pesan spam menunjukkan kontrol bekerja.",
+ sec:"Pertahanan berlapis: tidak ada satu kontrol pun yang cukup. Setiap kontrol harus dapat diverifikasi, bukan hanya diaktifkan.",
+ ts:["Fail2ban memblokir IP sendiri","Rspamd memberi false positive","Rate limit memblokir pengguna sah","ClamAV memakai memori berlebih"],
+ mods:[
+ {t:"Kontrol Pencegahan",after:["09-01"],refs:["ubuntu","postfix","dovecot"],chs:[
+  ["Kerangka Kontrol: Preventif, Detektif, Korektif",60,["Membedakan ketiga jenis kontrol dengan contoh mail server","Memetakan ancaman ke kontrol"],""],
+  ["Hardening SSH dan Eksposur Jaringan",120,["Memperketat SSH dan membatasi eksposur layanan","Memverifikasi dari luar bahwa hanya port yang direncanakan terbuka"],"sshd -T, ss, nmap (dari host lain, hanya pada server milik sendiri)|/etc/ssh/sshd_config.d/"],
+  ["Least Privilege, Izin Service, dan Manajemen Secrets",120,["Menetapkan izin berkas dan user service minimal","Mengelola secrets tanpa membocorkannya"],"stat, namei, systemctl show"],
+  ["Pemaksaan TLS, Keamanan SMTP AUTH, dan Kebijakan Password",120,["Memaksa TLS sebelum AUTH","Menetapkan kebijakan dan penyimpanan password yang kuat"],"postconf, doveadm pw, openssl s_client|smtpd_tls_auth_only"],
+  ["Rate Limiting, Batas Koneksi, dan Fail2ban",150,["Menerapkan batas koneksi dan laju pengiriman","Mengonfigurasi Fail2ban untuk Postfix dan Dovecot"],"fail2ban-client, postconf|/etc/fail2ban/jail.local, smtpd_client_connection_rate_limit"]]},
+ {t:"Spam, Malware, dan Phishing",after:["10-01"],refs:["rspamd","postfix"],chs:[
+  ["Rspamd: Arsitektur dan Instalasi",150,["Menjelaskan komponen Rspamd dan perannya","Memasang Rspamd dan Redis"],"rspamadm, rspamc, systemctl|/etc/rspamd/local.d/"],
+  ["Integrasi Rspamd dengan Postfix dan Tuning Kebijakan",150,["Mengintegrasikan Rspamd lewat milter","Menyetel aksi dan skor secara bertahap"],"rspamc, postconf|smtpd_milters, non_smtpd_milters"],
+  ["Pemindaian Malware dan Risiko Lampiran",120,["Menerapkan pemindaian malware dan kebijakan lampiran","Memahami keterbatasan antivirus"],"clamdscan, systemctl|/etc/clamav/"],
+  ["Pencegahan Phishing dan Spoofing; Strategi Enforcement DMARC",120,["Merancang tahapan enforcement DMARC","Mengenali spoofing dan lookalike domain"],"dig TXT, inspeksi header"],
+  ["Keamanan DNS untuk Mail",90,["Mengamankan akun dan perubahan DNS","Mengenali risiko seperti subdomain takeover dan MX salah"],"dig"]]},
+ {t:"Deteksi, Koreksi, dan Pemeliharaan",after:["10-02"],refs:["ubuntu","postfix"],chs:[
+  ["Deteksi Penyalahgunaan dan Batas Pengiriman Keluar",120,["Mendeteksi volume keluar abnormal","Menerapkan batas pengiriman per akun"],"postqueue, journalctl, awk"],
+  ["Integritas Log, Akses Log, dan Retensi",90,["Melindungi log dari perubahan dan akses tidak sah","Menetapkan retensi log"],"logrotate, rsyslogd, journalctl|/etc/logrotate.d/"],
+  ["Manajemen Patch dan Penilaian Kerentanan",120,["Menjalankan siklus patch dengan jendela pemeliharaan","Melakukan penilaian kerentanan dasar pada server milik sendiri"],"apt list --upgradable, needrestart"],
+  ["Enkripsi Backup, Penghapusan Aman, dan Retensi",90,["Mengenkripsi backup dan mengelola kuncinya","Menetapkan kebijakan retensi dan penghapusan data"],"gpg atau age (dipilih saat implementasi)"]]}]},
+
+{n:"Monitoring, Otomasi, Backup, dan Disaster Recovery",lv:10,env:"lab",
+ obj:["Memantau sumber daya, antrian, service, dan sertifikat","Mengotomasi tugas rutin secara aman","Membuat backup yang teruji dan rencana disaster recovery"],
+ dl:"Skrip monitoring dan alert uji, jadwal otomatis, backup terenkripsi dengan bukti restore, dokumen RTO/RPO",
+ crit:"Alert uji diterima; backup berjalan otomatis; restore ke VM bersih berhasil dan RTO/RPO terukur serta didokumentasikan.",
+ sec:"Backup yang belum pernah diuji restore bukan backup. Lindungi backup dengan enkripsi dan akses terpisah dari server utama.",
+ ts:["Disk atau inode penuh","Cron/timer tidak berjalan","Backup korup atau tidak lengkap","Alert tidak terkirim"],
+ mods:[
+ {t:"Monitoring dan Alerting",after:["10-03"],refs:["ubuntu","postfix"],chs:[
+  ["Monitoring Sumber Daya, Disk, dan Inode",90,["Memantau CPU, memori, disk, dan inode","Menetapkan ambang batas peringatan"],"df, free, vmstat, journalctl"],
+  ["Health Check Service, Antrian, dan Sertifikat",120,["Membuat pemeriksaan kesehatan service dan antrian","Memantau kedaluwarsa sertifikat"],"systemctl is-active, postqueue -j, openssl x509 -enddate"],
+  ["Alerting, Metrik, dan Dashboard",150,["Mengirim alert saat kegagalan","Menyusun dashboard metrik sederhana"],"skrip bash, systemd timer (alat metrik dipilih saat implementasi)"]]},
+ {t:"Otomasi",after:["11-01"],refs:["ubuntu"],chs:[
+  ["Otomasi dengan Bash yang Aman",120,["Menulis skrip idempoten dengan penanganan error","Menghindari penyimpanan secrets di skrip"],"bash, set -euo pipefail, shellcheck"],
+  ["Scheduled Jobs: systemd Timer dan Cron",90,["Menjadwalkan tugas dengan systemd timer","Membandingkan timer dan cron"],"systemctl list-timers, crontab|/etc/systemd/system/*.timer"],
+  ["Log Rotation",60,["Mengonfigurasi rotasi log","Memverifikasi rotasi berjalan"],"logrotate -d|/etc/logrotate.d/"]]},
+ {t:"Backup dan Disaster Recovery",after:["11-02"],refs:["ubuntu"],chs:[
+  ["Strategi dan Otomasi Backup",150,["Menentukan apa yang di-backup (mailbox, konfigurasi, kunci DKIM, database)","Mengotomasi backup terenkripsi"],"rsync, tar (alat backup dipilih saat implementasi)"],
+  ["Validasi Integritas dan Uji Restore",120,["Memverifikasi integritas backup","Menguji restore ke sistem bersih"],"sha256sum, rsync -n"],
+  ["RTO, RPO, dan Rencana Disaster Recovery",90,["Menetapkan RTO dan RPO","Menyusun runbook pemulihan bencana"],""],
+  ["Manajemen Konfigurasi dan Dokumentasi Infrastruktur",90,["Menjelaskan konsep configuration management","Menjaga dokumentasi arsitektur tetap mutakhir"],""],
+  ["Perencanaan Kapasitas dan Konsep High Availability",90,["Memproyeksikan pertumbuhan storage dan beban","Menjelaskan konsep redundansi dan HA"],"df, du"]]}]},
+
+{n:"Deployment Publik dan Kesiapan Produksi",lv:11,env:"pub",
+ obj:["Menyiapkan VPS dan DNS publik untuk mail server","Menguji konektivitas dan pengiriman ke penyedia eksternal","Menyusun checklist go-live dan rencana rollback"],
+ dl:"Checklist go-live terisi, hasil uji masuk dan keluar, analisis header, rencana rollback",
+ crit:"Uji masuk dan keluar berhasil dengan Message-ID terlacak; PTR, FCrDNS, TLS, dan autentikasi valid; keputusan Go/No-Go beralasan. Tidak ada jaminan inbox ke penyedia eksternal.",
+ sec:"Hanya buka port yang dibutuhkan. Verifikasi dari luar bahwa relay tertutup dan layanan admin tidak terekspos sebelum go-live.",
+ ts:["Port 25 outbound diblokir penyedia","PTR tidak bisa diatur","IP terdaftar di blocklist","Email masuk folder spam"],
+ mods:[
+ {t:"Persiapan Infrastruktur Publik",after:["11-03"],env:"pub",refs:["ubuntu","rfc"],chs:[
+  ["Memilih VPS dan Memahami Pembatasan Port SMTP",90,["Menilai penyedia berdasarkan kebijakan port 25 dan PTR","Menjelaskan mengapa koneksi rumah dan IP dinamis bermasalah"],""],
+  ["DNS Publik dan Koordinasi PTR",90,["Menyelaraskan A/AAAA, MX, dan PTR di DNS publik","Memverifikasi FCrDNS dari luar"],"dig, host"],
+  ["Aturan Firewall dan Eksposur Layanan Publik",90,["Menetapkan port yang boleh terbuka","Memverifikasi eksposur dari host eksternal"],"ufw status, ss -tuln, nmap (dari host lain, server milik sendiri)"],
+  ["Reverse Proxy dan Keamanan Webmail Publik",90,["Menimbang penggunaan reverse proxy untuk webmail","Menerapkan header dan pembatasan akses"],"curl -I|/etc/nginx/ atau /etc/apache2/"]]},
+ {t:"Pengujian dan Go-Live",after:["12-01"],env:"prod",refs:["rfc","ubuntu"],chs:[
+  ["Pengujian Konektivitas Masuk dan Keluar",90,["Menguji port 25, 587, 465, dan 993 dari luar","Menguji pengiriman keluar dan penerimaan masuk"],"nc, openssl s_client, swaks (opsional)"],
+  ["Reputasi Server dan Uji Pengiriman ke Penyedia Eksternal",120,["Memahami reputasi IP dan domain","Menguji pengiriman ke penyedia eksternal tanpa mengklaim jaminan"],"dig, inspeksi header"],
+  ["Analisis Header dan Diagnosis Folder Spam",90,["Membaca header Received dan Authentication-Results","Mendiagnosis penyebab pesan masuk spam"],"inspeksi header"],
+  ["Kebijakan Abuse Penyedia, Checklist Go-Live, dan Rollback",120,["Memahami kebijakan abuse penyedia","Menyusun checklist go-live dan rencana rollback"],""]]}]},
+
+{n:"Operasi dan Administrasi Email",lv:12,env:"prod",
+ obj:["Mengelola domain, akun, alias, quota, dan retensi","Mengelola antrian dan melacak kegagalan pengiriman","Menjalankan operasi rutin, upgrade, dan runbook"],
+ dl:"Prosedur operasional baku, jadwal harian sampai kuartalan, dan kumpulan runbook",
+ crit:"Seluruh prosedur dapat dijalankan dan divalidasi; runbook mencakup gejala, diagnosis, tindakan korektif, validasi, dan kriteria eskalasi.",
+ sec:"Setiap perubahan produksi memerlukan change management, backup konfigurasi, dan rencana rollback.",
+ ts:["Pengguna tidak bisa login","Antrian menumpuk","Volume keluar abnormal","Disk hampir penuh"],
+ mods:[
+ {t:"Administrasi Domain dan Akun",after:["12-02"],refs:["postfix","dovecot"],chs:[
+  ["Menambah dan Menghapus Domain",90,["Menambah domain lengkap dengan DNS dan autentikasi","Menghapus domain dengan aman"],"postmap, doveadm"],
+  ["Membuat, Menonaktifkan, dan Menghapus Akun",90,["Menjalankan prosedur akun secara konsisten","Menjaga jejak audit perubahan akun"],"doveadm"],
+  ["Reset Password, Pemulihan Akses, dan Pengguna Tidak Bisa Login",90,["Mereset password dengan aman","Mendiagnosis masalah login"],"doveadm auth test, journalctl -u dovecot"],
+  ["Alias, Distribution Address, Forwarding, dan Shared Mailbox",120,["Mengelola alias dan alamat distribusi","Menerapkan shared mailbox bila didukung"],"postmap, doveadm acl"],
+  ["Quota, Konsumsi Storage, dan Kebijakan Retensi",90,["Memantau konsumsi storage","Menerapkan kebijakan retensi dan penghapusan"],"doveadm quota, du"]]},
+ {t:"Antrian dan Pengiriman",after:["13-01"],refs:["postfix"],chs:[
+  ["Inspeksi dan Manajemen Antrian yang Aman",90,["Memeriksa antrian tanpa merusak pesan","Menerapkan hold, requeue, dan hapus dengan hati-hati"],"postqueue -p, postsuper, postcat"],
+  ["Memantau Deferred dan Bounce",90,["Mengklasifikasi penyebab deferred dan bounce","Menindaklanjuti sesuai penyebab"],"journalctl -u postfix, postqueue"],
+  ["Melacak Message-ID dan Diagnosis Kegagalan Pengiriman",120,["Melacak satu pesan end-to-end di log","Menentukan titik kegagalan"],"journalctl, grep"],
+  ["Volume Keluar Abnormal dan Akun Terkompromi (Penanganan Awal)",120,["Mengenali pola volume keluar abnormal","Menjalankan langkah penahanan awal"],"postqueue, journalctl, doveadm"]]},
+ {t:"Operasi Rutin dan Tata Kelola",after:["13-02"],refs:["ubuntu","rfc"],chs:[
+  ["Memantau Reputasi dan Hasil SPF, DKIM, DMARC",90,["Memantau reputasi domain dan IP","Menganalisis hasil autentikasi dan laporan DMARC"],"dig, inspeksi header"],
+  ["Upgrade, Maintenance Window, dan Change Management",120,["Merencanakan upgrade dan jendela pemeliharaan","Mencadangkan konfigurasi sebelum perubahan"],"apt, etckeeper (opsional)"],
+  ["Komunikasi Insiden dan Ketersediaan Layanan",60,["Menyusun templat komunikasi insiden","Menetapkan jalur eskalasi"],""],
+  ["Kapasitas, Perluasan Storage, dan Offboarding Akun",90,["Memperluas storage dengan aman","Menjalankan offboarding dan retensi data"],"lsblk, df, resize2fs (sesuai konfigurasi)"],
+  ["Checklist Operasional Harian, Mingguan, Bulanan, dan Kuartalan",90,["Menyusun jadwal pemeliharaan berkala","Membuat checklist yang dapat diaudit"],""],
+  ["Runbook Operasional",150,["Menulis runbook dengan gejala, diagnosis, tindakan, validasi, dan eskalasi","Menguji runbook lewat simulasi"],""]]}]},
+
+{n:"Troubleshooting dan Incident Response",lv:13,env:"prod",
+ obj:["Mendiagnosis kegagalan pengiriman, autentikasi, TLS, dan DNS secara sistematis","Menjalankan incident response dengan preservasi bukti","Memulihkan layanan setelah kompromi dan menulis postmortem"],
+ dl:"Dokumen troubleshooting minimal lima skenario, prosedur IR, dan templat postmortem",
+ crit:"Learner dapat menyelesaikan skenario simulasi kegagalan dan insiden dengan langkah terdokumentasi dan validasi pemulihan.",
+ sec:"Pertahankan bukti sebelum membersihkan; sanitasi log sebelum dibagikan; jangan membagikan secrets saat eskalasi.",
+ ts:["Kode SMTP 4xx vs 5xx disalahpahami","Akar masalah campur antara DNS dan TLS","Bukti terhapus saat pemulihan"],
+ mods:[
+ {t:"Troubleshooting",after:["13-03"],refs:["postfix","dovecot","rfc"],chs:[
+  ["Metodologi Troubleshooting Email",60,["Menerapkan pendekatan hipotesis dan uji","Mendokumentasikan temuan secara konsisten"],""],
+  ["Matriks Kegagalan Pengiriman dan Kode SMTP",120,["Menginterpretasi kode SMTP dan enhanced status code","Menentukan tindakan untuk tiap kategori"],"journalctl, postqueue"],
+  ["Kegagalan Autentikasi, TLS, dan DNS",120,["Mendiagnosis kegagalan login, TLS, dan DNS","Memvalidasi perbaikan"],"openssl s_client, dig, doveadm auth test"],
+  ["Penyebab Email Masuk Spam dan Penurunan Reputasi",90,["Menganalisis header untuk penyebab spam","Menyusun rencana perbaikan reputasi"],"inspeksi header, dig"]]},
+ {t:"Incident Response",after:["14-01"],refs:["ubuntu","postfix"],chs:[
+  ["Prosedur Incident Response dan Preservasi Forensik",120,["Menjalankan tahapan IR","Mengamankan bukti secara forensik dasar"],"tar, sha256sum, journalctl"],
+  ["Investigasi Kompromi Akun dan Penyalahgunaan Antrian",150,["Menyelidiki akun terkompromi","Menahan penyalahgunaan antrian"],"postqueue, journalctl, doveadm"],
+  ["Pemulihan Setelah Kompromi dan Postmortem",120,["Memulihkan layanan dan merotasi secrets","Menulis postmortem tanpa menyalahkan individu"],""]]}]},
+
+{n:"Infrastruktur Email Lanjutan (Opsional)",lv:14,env:"pub",opt:true,
+ obj:["Mengelola banyak domain dan routing lanjutan","Menggunakan gateway spam, smart host, dan backend pengguna SQL/LDAP","Merancang arsitektur HA, DR, dan multi-server"],
+ dl:"Dokumen desain arsitektur lanjutan dengan analisis trade-off; lab spesialisasi pilihan",
+ crit:"Learner dapat memilih dan membenarkan arsitektur lanjutan berdasarkan kebutuhan; seluruh topik bersifat spesialisasi opsional.",
+ sec:"Kompleksitas menambah risiko: setiap komponen baru harus punya pemilik, monitoring, backup, dan rencana pemulihan.",
+ ts:["Loop routing antar server","Konfigurasi tidak konsisten antar node","Backend SQL/LDAP tidak tersedia"],
+ mods:[
+ {t:"Multi-Domain dan Routing",after:["13-03"],opt:true,refs:["postfix"],chs:[
+  ["Multiple Domain pada Satu Server",120,["Menambah banyak domain secara terstruktur","Menjaga isolasi dan kebijakan per domain"],"postconf, postmap"],
+  ["Transport Routing Lanjutan",120,["Mengatur transport berdasarkan domain atau pengirim","Menghindari loop routing"],"postmap, postconf|transport_maps"],
+  ["Relay dan Smart Host",120,["Mengonfigurasi relayhost dan autentikasinya","Menilai kapan smart host diperlukan"],"postconf|relayhost, smtp_sasl_*"]]},
+ {t:"Gateway dan Backend Pengguna",after:["15-01"],opt:true,refs:["rspamd","dovecot","postfix"],chs:[
+  ["Gateway Filtering Spam Terdedikasi",150,["Merancang gateway filtering terpisah","Mengatur routing ke server backend"],"rspamadm, postconf"],
+  ["Virtual User Berbasis SQL atau LDAP",180,["Menghubungkan Postfix dan Dovecot ke SQL atau LDAP","Mengelola ketersediaan backend"],"doveadm, postmap -q"],
+  ["Centralized Logging",120,["Mengirim log ke pusat pengumpulan log","Menjaga integritas dan retensi log"],"rsyslogd, journalctl"]]},
+ {t:"Arsitektur Skala Besar",after:["15-02"],opt:true,refs:["ubuntu","dovecot"],chs:[
+  ["Pertimbangan Kontainerisasi dan Docker",90,["Membandingkan deployment native dan kontainer","Mengenali risiko operasional kontainer untuk mail"],""],
+  ["Arsitektur High Availability dan DR",150,["Merancang HA dan DR dengan RTO/RPO","Mengenali titik kegagalan tunggal"],""],
+  ["Scaling, Desain Storage, dan Multi-Server",150,["Merancang storage dan scaling","Merancang mail routing multi-server"],""],
+  ["Otomasi Administrasi yang Aman",120,["Mengotomasi administrasi tanpa membocorkan secrets","Menerapkan review dan audit perubahan"],"bash, git"]]}]},
+
+{n:"Capstone dan Penilaian Operasional",lv:15,env:"pub",
+ obj:["Membangun mail server berfungsi untuk domain milik sendiri","Membuktikan setiap kontrol teknis dan operasional dengan bukti terukur","Menyusun dokumentasi dan penilaian kesiapan produksi"],
+ dl:"Paket bukti: dokumentasi konfigurasi, diagram arsitektur, log tersanitasi, hasil uji, checklist keamanan, bukti backup/restore, runbook akhir",
+ crit:"15 kriteria penerimaan capstone terpenuhi dengan bukti. Jangan menyerahkan password, kunci privat, token, atau secrets hidup lainnya sebagai bukti.",
+ sec:"Sanitasi seluruh bukti: hapus password, kunci privat, token, dan data pribadi dari konfigurasi dan log sebelum diserahkan.",
+ ts:["Bukti tidak dapat direproduksi","Log belum disanitasi","Checklist tidak ditunjang uji nyata"],
+ mods:[
+ {t:"Proyek Akhir",after:["14-02"],refs:["ubuntu","postfix","dovecot","le","rspamd","rfc"],chs:[
+  ["Perencanaan dan Arsitektur Capstone",120,["Merancang arsitektur dan rencana implementasi","Menetapkan kriteria penerimaan yang terukur"],""],
+  ["Implementasi Mail Server Capstone",480,["Membangun Ubuntu, DNS, Postfix, Dovecot, TLS, dan autentikasi","Menyiapkan webmail atau klien desktop"],"seluruh alat pada Level 1-8"],
+  ["Pengujian Mail Flow, Autentikasi, dan Kontrol Spam/Abuse",240,["Menguji email masuk dan keluar serta autentikasi","Menguji kontrol spam, abuse, dan relay"],"swaks (opsional), dig, rspamc, inspeksi header"],
+  ["Monitoring, Backup, Restore, dan Validasi Keamanan",240,["Menerapkan monitoring dan membuktikan restore","Memvalidasi kontrol keamanan"],"skrip monitoring, backup, nmap (dari host lain)"],
+  ["Dokumentasi, Runbook, dan Penilaian Kesiapan Produksi",240,["Menyusun dokumentasi dan runbook akhir","Mengisi penilaian kesiapan produksi dan keputusan Go/No-Go"],""]]}]}
+];
+
+const CAPSTONE=[
+["Setup Ubuntu Server","SSH hanya kunci, firewall aktif dengan port minimal, baseline health check tanpa temuan kritis"],
+["Domain dan DNS","A/AAAA, MX, PTR konsisten (FCrDNS) dan terverifikasi dari minimal dua resolver"],
+["Postfix","postfix check tanpa error; konfigurasi (postconf -n) terdokumentasi"],
+["Dovecot","Login IMAPS berhasil untuk minimal dua akun; folder tersinkron pada minimal dua klien"],
+["Sertifikat TLS","Rantai valid; uji perpanjangan (dry-run) berhasil; tanggal kedaluwarsa dipantau"],
+["SMTP AUTH dan relay","Submission tanpa AUTH ditolak; relay ke domain eksternal tanpa autentikasi ditolak"],
+["SPF, DKIM, DMARC","Authentication-Results menunjukkan SPF dan DKIM pass dengan alignment pada pesan uji (bukan jaminan inbox)"],
+["Webmail atau klien","Kirim, terima, lampiran, dan logout teruji melalui HTTPS atau klien desktop"],
+["Uji masuk dan keluar","Minimal 3 uji masuk dan 3 uji keluar dengan Message-ID terlacak di log"],
+["Kontrol spam dan abuse","Filter spam aktif, rate limit teruji, dan Fail2ban terbukti memblokir uji brute-force"],
+["Monitoring operasional","Alert uji untuk disk, antrian, dan sertifikat tersimulasi dan diterima"],
+["Backup dan restore","Restore ke VM bersih berhasil; RTO dan RPO terukur dan tercatat"],
+["Validasi keamanan","Setiap kontrol preventif, detektif, dan korektif memiliki bukti verifikasi; pemindaian eksternal hanya menunjukkan port yang direncanakan"],
+["Dokumentasi troubleshooting","Minimal lima skenario: gejala, diagnosis, perbaikan, validasi"],
+["Penilaian kesiapan produksi","Checklist go-live terisi dan keputusan Go/No-Go dibenarkan secara tertulis"]];
+
+const SCHED=[
+["Harian","Status service dan antrian, deferred/bounce, kapasitas disk, alert semalam"],
+["Mingguan","Review login gagal dan Fail2ban, update keamanan, ringkasan volume keluar, uji restore sampel"],
+["Bulanan","Review reputasi dan laporan DMARC, penggunaan quota, audit akun, uji perpanjangan sertifikat"],
+["Kuartalan","Simulasi disaster recovery, review kebijakan dan retensi, rotasi secrets, review dokumentasi dan runbook, penilaian kerentanan"]];
+
+/* Konten chapter yang sudah diimplementasikan. Kunci = ID chapter. Kosong = semua chapter masih spesifikasi.
+   Skema: {theory:[html], steps:[html], cmds:[{ctx:"user"|"root",label,code,out}], cfgs:[{path,code,explain}], verify:[html],
+           trouble:[{gejala,diagnosis,perbaikan}], security:[html], exercises:[html], assessment:[html], refs:[{t,u}]} */
+/* PERHATIAN: nilai CONTENT berupa HTML mentah yang disuntikkan via innerHTML tanpa sanitasi. Hanya isi dengan konten tepercaya yang ditulis pemilik portal;
+   jangan menerima konten dari pihak lain tanpa sanitasi lebih dulu. */
+const CONTENT={};
+/* Teks polos dari CONTENT untuk pencarian isi materi. */
+function contentText(c){
+  if(!c)return "";
+  const out=[];
+  (function walk(v){if(typeof v==="string")out.push(v.replace(/<[^>]*>/g," "));else if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==="object")Object.values(v).forEach(walk);})(c);
+  return out.join(" ");
+}
+
+const pad=n=>String(n).padStart(2,"0");
+const CAT=[],MODS=[],CHS=[],byId=new Map(),modByKey=new Map();
+CATS.forEach((c,i)=>{
+  const cat={id:"CAT-"+pad(i+1),idx:i+1,name:c.n,lv:c.lv,env:c.env,opt:!!c.opt,obj:c.obj,dl:c.dl,crit:c.crit,sec:c.sec,ts:c.ts,mods:[],chs:[]};
+  CAT.push(cat);byId.set(cat.id,cat);
+  c.mods.forEach((m,j)=>{
+    const key=pad(i+1)+"-"+pad(j+1);
+    const mod={id:"MOD-"+key,key,title:m.t,cat,after:m.after,env:m.env||c.env,opt:!!(m.opt||c.opt),refs:m.refs||["ubuntu"],chs:[]};
+    cat.mods.push(mod);MODS.push(mod);byId.set(mod.id,mod);modByKey.set(key,mod);
+    m.chs.forEach((t,k)=>{
+      const ck=key+"-"+pad(k+1),parts=(t[3]||"").split("|");
+      const ch={id:"CH-"+ck,key:ck,lab:"LAB-"+ck,asm:"ASM-"+ck,title:t[0],min:t[1],objs:t[2],cmds:(parts[0]||"").trim(),files:(parts[1]||"").trim(),impl:!!(t[3]||"").trim(),mod,cat,pre:[]};
+      ch.hay=(ch.id+" "+ch.title+" "+mod.title+" "+cat.name+" "+ch.objs.join(" ")+" "+(t[3]||"")+" "+contentText(CONTENT["CH-"+ck])).toLowerCase();
+      mod.chs.push(ch);cat.chs.push(ch);CHS.push(ch);byId.set(ch.id,ch);
+    });
+  });
+});
+MODS.forEach(m=>{
+  m.chs.forEach((ch,k)=>{
+    if(k>0){ch.pre=[m.chs[k-1].id];}
+    else{ch.pre=m.after.map(a=>{const mm=modByKey.get(a);if(!mm)throw new Error("Modul prasyarat tidak ada: "+a);return mm.chs[mm.chs.length-1].id;});}
+  });
+});
+CAT.forEach(c=>{c.min=c.chs.reduce((a,x)=>a+x.min,0);c.preCats=[...new Set(c.mods.flatMap(m=>m.after).map(a=>modByKey.get(a).cat).filter(x=>x!==c))];});
+/*DATA-END*/
+
+/* ===== Utilitas ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=m=>{const h=Math.floor(m/60),r=m%60;return h?h+" jam"+(r?" "+r+" mnt":""):r+" mnt";};
+const ul=a=>"<ul>"+a.map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+const codes=s=>s.split(",").map(x=>x.trim()).filter(Boolean).map(x=>'<code class="i">'+esc(x)+"</code>").join(" ");
+const KEY="kurikulum-mail-ubuntu-v1",TKEY="kmu-theme";
+let mem={};
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return mem[k]||null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){mem[k]=v;}}};
+let state={status:{},checks:{}};
+function loadState(){
+  let d=null;
+  try{d=JSON.parse(store.get(KEY)||"null");}catch(e){}
+  state=d?sanitize(d):{status:{},checks:{}};
+}
+function sanitize(d){
+  const st={},ck={};
+  if(d&&d.status&&typeof d.status==="object"){for(const id of Object.keys(d.status)){const v=d.status[id];if(byId.has(id)&&id.startsWith("CH-")&&Number.isInteger(v)&&v>0&&v<=4)st[id]=v;}}
+  if(d&&d.checks&&typeof d.checks==="object"){for(const id of Object.keys(d.checks)){if(!byId.has(id)||!id.startsWith("CH-")||typeof d.checks[id]!=="object"||!d.checks[id])continue;const o={};for(const k of Object.keys(d.checks[id])){if(/^[a-z]\d{1,2}$/.test(k)&&d.checks[id][k]===true)o[k]=true;}if(Object.keys(o).length)ck[id]=o;}}
+  return {status:st,checks:ck};
+}
+function save(){store.set(KEY,JSON.stringify({v:1,status:state.status,checks:state.checks}));}
+const st=id=>state.status[id]||0;
+const isReady=ch=>st(ch.id)!==4&&ch.pre.every(p=>st(p)===4);
+/* Persentase progres hanya menghitung chapter wajib (bukan di modul/kategori opsional); chapter opsional dilaporkan terpisah. */
+const isOpt=c=>c.mod.opt;
+function stats(){
+  let done=0,prog=0,coreDone=0,coreTotal=0,optDone=0,optTotal=0;
+  CHS.forEach(c=>{
+    const s=st(c.id);
+    if(s===4)done++;else if(s>0)prog++;
+    if(isOpt(c)){optTotal++;if(s===4)optDone++;}else{coreTotal++;if(s===4)coreDone++;}
+  });
+  return{done,prog,total:CHS.length,coreDone,coreTotal,optDone,optTotal,pct:Math.round(coreDone/coreTotal*100)};
+}
+function catStats(c){const d=c.chs.filter(x=>st(x.id)===4).length;return{d,t:c.chs.length,pct:Math.round(d/c.chs.length*100)};}
+function curLevel(){return CAT.find(c=>c.chs.some(x=>!isOpt(x)&&st(x.id)!==4))||null;}
+function toast(m){const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",3200);}
+function badge(s){return '<span class="badge s'+s+'"><span aria-hidden="true">'+GLYPH[s]+"</span> "+STATUS[s]+"</span>";}
+
+/* ===== Filter ===== */
+const F={q:"",cat:"",status:"",inc:false,ready:false};
+const filterOn=()=>!!(F.q||F.cat||F.status!==""||F.inc||F.ready);
+function match(ch){
+  if(F.cat&&ch.cat.id!==F.cat)return false;
+  if(F.status!==""&&st(ch.id)!==+F.status)return false;
+  if(F.inc&&st(ch.id)===4)return false;
+  if(F.ready&&!isReady(ch))return false;
+  if(F.q){const t=F.q.toLowerCase().split(/\s+/).filter(Boolean);if(!t.every(w=>ch.hay.includes(w)))return false;}
+  return true;
+}
+
+/* ===== Navigasi samping ===== */
+const openSet=new Set();
+let curId="";
+function renderNav(){
+  const on=filterOn();let shown=0,html="";
+  CAT.forEach(cat=>{
+    const mods=cat.mods.map(m=>({m,chs:m.chs.filter(match)})).filter(x=>!on||x.chs.length);
+    if(on&&!mods.length)return;
+    const cs=catStats(cat),open=on||openSet.has(cat.id)||(curId&&byId.get(curId)&&(byId.get(curId).cat===cat||byId.get(curId)===cat));
+    html+='<li class="cat"><button class="tg" type="button" data-tg="'+cat.id+'" aria-expanded="'+!!open+'" aria-controls="c-'+cat.id+'"><span class="chev" aria-hidden="true">▸</span><span>L'+cat.lv+" · "+esc(cat.name)+'</span><span class="cnt">'+cs.d+"/"+cs.t+'</span></button><ul id="c-'+cat.id+'"'+(open?"":" hidden")+'><li><a class="catp" href="#'+cat.id+'">Ringkasan kategori '+cat.id+"</a></li>";
+    mods.forEach(({m,chs})=>{
+      const mopen=on||openSet.has(m.id)||(curId&&byId.get(curId)&&byId.get(curId).mod===m);
+      html+='<li class="mod"><button class="tg" type="button" data-tg="'+m.id+'" aria-expanded="'+!!mopen+'" aria-controls="m-'+m.id+'"><span class="chev" aria-hidden="true">▸</span><span>'+esc(m.title)+'</span></button><ul id="m-'+m.id+'"'+(mopen?"":" hidden")+">";
+      chs.forEach(ch=>{shown++;const s=st(ch.id);html+='<li><a class="chl'+(ch.id===curId?" active":"")+'" href="#'+ch.id+'"'+(ch.id===curId?' aria-current="page"':"")+'><span class="sg s'+s+'" aria-hidden="true">'+GLYPH[s]+'</span><span><span class="sr">'+STATUS[s]+": </span>"+esc(ch.title)+"</span></a></li>";});
+      html+="</ul></li>";
+    });
+    html+="</ul></li>";
+  });
+  $("#tree").innerHTML=html||'<li class="rc">Tidak ada chapter yang cocok dengan filter.</li>';
+  $("#rc").textContent=on?shown+" chapter cocok dengan filter":CHS.length+" chapter";
+  $("#qInc").setAttribute("aria-pressed",F.inc);$("#qReady").setAttribute("aria-pressed",F.ready);
+}
+function updateHeader(){
+  const s=stats(),lv=curLevel();
+  $("#hPct").textContent=s.pct+"%";
+  const b=$("#hBar");b.setAttribute("aria-valuenow",s.pct);b.firstElementChild.style.width=s.pct+"%";
+  $("#hLevel").textContent=lv?"Level "+lv.lv+" · "+lv.name:"Semua level selesai";
+}
+
+/* ===== Komponen ===== */
+function ph(s){return s.replace(/&lt;([A-Z0-9][A-Z0-9_-]*)&gt;/g,'<span class="ph">&lt;$1&gt;</span>');}
+function codeBlock(o){
+  const tag={user:"Pengguna biasa ($)",root:"Root / sudo (#)",config:"Berkas konfigurasi",output:"Output yang diharapkan"}[o.ctx]||o.ctx;
+  return '<figure class="code '+esc(o.ctx)+'"><figcaption><span class="tag">'+tag+'</span><span class="lbl">'+esc(o.label||"")+"</span>"+(o.ctx==="output"?"":'<button type="button" class="btn copy" data-copy aria-label="Salin: '+esc(o.label||tag)+'">Salin</button>')+"</figcaption><pre><code>"+ph(esc(o.code))+"</code></pre></figure>";
+}
+function checklist(id,prefix,items){
+  const ck=state.checks[id]||{};
+  return '<ul class="cl">'+items.map((t,i)=>{const k=prefix+i;return '<li><label><input type="checkbox" data-ck="'+id+'" data-k="'+k+'"'+(ck[k]?" checked":"")+"> <span>"+t+"</span></label></li>";}).join("")+"</ul>";
+}
+function sec(n,title,body){return '<section class="sec" id="s'+n+'" aria-labelledby="h'+n+'"><h2 id="h'+n+'"><span class="n">'+n+".</span>"+title+"</h2>"+body+"</section>";}
+function refsList(keys,extra){
+  const a=[...new Set(keys)].map(k=>REFS[k]).filter(Boolean).map(r=>[r[0],r[1]]);
+  (extra||[]).forEach(r=>a.push([r.t,r.u]));
+  return ul(a.map(r=>'<a href="'+esc(r[1])+'" target="_blank" rel="noopener noreferrer">'+esc(r[0])+"</a> <small>("+esc(r[1])+")</small>"));
+}
+
+/* ===== Tampilan: Chapter ===== */
+/* Daftar bab terbit dari materi/chapters.json (opsional; gagal-aman). */
+let PUB={},LVL={};
+const PUBRE=/^chapter\/CH-\d{2}-\d{2}-\d{2}\/$/;
+function matUrl(id){const p=PUB[id]&&PUB[id].path;return typeof p==="string"&&PUBRE.test(p)?new URL("materi/"+p,document.baseURI).href:null;}
+const LVLRE=/^level\/L\d{1,2}\/$/;
+function lvlUrl(id){const p=LVL[id]&&LVL[id].path;return typeof p==="string"&&LVLRE.test(p)?new URL("materi/"+p,document.baseURI).href:null;}
+function renderChapter(ch){
+  const s=st(ch.id),c=CONTENT[ch.id],pend=!c,idx=CHS.indexOf(ch),next=CHS[idx+1],prev=CHS[idx-1];
+  const crumbs='<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Beranda</a></li><li><a href="#'+ch.cat.id+'">'+ch.cat.id+" · "+esc(ch.cat.name)+"</a></li><li>"+ch.mod.id+" · "+esc(ch.mod.title)+'</li><li aria-current="page">'+ch.id+"</li></ol></nav>";
+  const sel='<label>Status belajar: <select data-status="'+ch.id+'">'+STATUS.map((x,i)=>'<option value="'+i+'"'+(i===s?" selected":"")+">"+x+"</option>").join("")+"</select></label>";
+  const titles=["Ringkasan","Tujuan Pembelajaran","Prasyarat","Materi Teori","Praktik dan Implementasi","Perintah Linux","Konfigurasi","Verifikasi","Troubleshooting","Security Review","Latihan","Assessment","Checklist Kelulusan","Referensi Resmi"];
+  const toc='<div class="toc noprint" aria-label="Lompat ke bagian">'+titles.map((t,i)=>'<a href="#s'+(i+1)+'" data-jump>'+(i+1)+". "+t+"</a>").join("")+"</div>";
+  const mu=matUrl(ch.id);
+  const banner=mu?'<div class="infobox"><strong>Materi lengkap tersedia.</strong> <a class="btn pri" href="'+esc(mu)+'">Buka materi</a><br><small>Bagian di bawah adalah spesifikasi dan rencana cakupan dari dashboard.</small></div>':pend?'<div class="warnbox" role="note"><strong>Belum diimplementasikan.</strong> Detail lesson, perintah, dan konfigurasi chapter ini belum ditulis. Bagian di bawah memuat <em>spesifikasi dan rencana cakupan</em>, bukan materi final. Materi akan ditambahkan secara bertahap dengan ID chapter yang sama.</div>':'<div class="infobox">Chapter ini sudah diimplementasikan.</div>';
+  const ready=ch.pre.every(p=>st(p)===4);
+  let h=crumbs+'<h2 class="pt">'+esc(ch.title)+"</h2>"+badge(s)+'<span class="badge">'+(ch.impl?"Implementasi praktik":"Konseptual")+'</span><span class="badge">'+ENV[ch.mod.env]+"</span>"+(ch.mod.opt?'<span class="badge">Opsional</span>':"")+(ready||!ch.pre.length?'<span class="badge s4">Prasyarat terpenuhi</span>':'<span class="badge s3">Prasyarat belum lengkap</span>')+banner+toc;
+  /* 1 */
+  const lessons=ch.objs.map((o,i)=>"<li><code class='i'>LES-"+ch.key+"-"+(i+1)+"</code> "+esc(o)+"</li>").join("");
+  h+=sec(1,"Ringkasan",'<p>'+(pend?"Cakupan: ":"")+esc(ch.objs.join("; "))+".</p><div class='meta'><div><b>ID chapter</b>"+ch.id+"</div><div><b>Kategori / modul</b>"+ch.cat.id+" / "+ch.mod.id+"</div><div><b>Estimasi belajar</b>"+fmt(ch.min)+"</div><div><b>Lingkungan</b>"+ENV[ch.mod.env]+"</div><div><b>Rilis referensi</b>"+esc(REL)+'</div><div><b>Status</b><span class="noprint">'+sel+"</span></div></div><h3>Rencana lesson, lab, dan assessment</h3><ul>"+lessons+"<li><code class='i'>"+ch.lab+"</code> Praktik lab</li><li><code class='i'>"+ch.asm+"</code> Assessment</li></ul>");
+  /* 2 */
+  const objs=ch.objs.slice();if(ch.impl)objs.push("Memverifikasi hasil dengan validasi sintaks, health check service, dan inspeksi log");
+  h+=sec(2,"Tujuan Pembelajaran",ul(objs.map(esc)));
+  /* 3 */
+  h+=sec(3,"Prasyarat",ch.pre.length?"<ul>"+ch.pre.map(p=>{const q=byId.get(p);return '<li><a href="#'+p+'">'+p+" · "+esc(q.title)+"</a> "+badge(st(p))+"</li>";}).join("")+"</ul>":"<p>Tidak ada prasyarat chapter; ini titik awal kurikulum.</p>");
+  /* 4-12 */
+  if(pend){
+    h+=sec(4,"Materi Teori","<p>Materi teori belum ditulis. Rencana cakupan mengikuti prinsip <em>jelaskan sebelum eksekusi</em>: tujuan komponen, cara kerja, alasan diperlukan, dependensi, implikasi keamanan, cara verifikasi, serta pengenalan dan pemulihan error umum.</p><p>Topik inti:</p>"+ul(ch.objs.map(esc)));
+    h+=sec(5,"Praktik dan Implementasi","<h3>Checklist persiapan</h3>"+checklist(ch.id,"p",prepItems(ch))+'<p class="rc">Langkah implementasi rinci belum tersedia. Lingkungan sasaran: <strong>'+ENV[ch.mod.env]+"</strong>. Keberhasilan di lab tidak otomatis berarti siap produksi.</p>");
+    h+=sec(6,"Perintah Linux",ch.cmds?"<p>Perintah dan alat yang direncanakan (daftar rencana; penjelasan, contoh, dan output verifikasi menyusul):</p><p>"+codes(ch.cmds)+'</p><p class="rc">Blok kode akan dilabeli konteks eksekusi (pengguna biasa atau root), memiliki tombol salin, dan memisahkan perintah dari output. Tidak ada perintah yang dijalankan otomatis.</p>':"<p>Chapter konseptual: tidak ada perintah wajib.</p>");
+    h+=sec(7,"Konfigurasi",ch.files?"<p>Berkas dan direktif yang direncanakan:</p><p>"+codes(ch.files)+"</p><p class='rc'>Nilai direktif akan divalidasi terhadap paket pada "+esc(REL)+" saat implementasi.</p>":"<p>Tidak ada berkas konfigurasi khusus yang direncanakan pada chapter ini.</p>");
+    h+=sec(8,"Verifikasi",ch.impl?ul(["Validasi sintaks konfigurasi sebelum reload","Pemeriksaan kesehatan service","Inspeksi log yang relevan","Uji jaringan atau protokol bila relevan","Definisi hasil sukses dan gejala kegagalan umum","Prosedur pemulihan yang aman"]):"<p>Verifikasi berupa assessment pemahaman konsep.</p>");
+    h+=sec(9,"Troubleshooting","<p>Kategori gejala yang direncanakan untuk "+ch.cat.id+" (kasus rinci belum ditulis):</p>"+ul(ch.cat.ts.map(esc)));
+    h+=sec(10,"Security Review","<p>"+esc(ch.cat.sec)+"</p>"+ul(["Terapkan least privilege dan default aman","Jangan menyimpan kredensial atau kunci privat di catatan, repositori, atau bukti","Setiap kontrol keamanan perlu prosedur verifikasi efektivitas"]));
+    h+=sec(11,"Latihan","<p><code class='i'>"+ch.lab+"</code> "+(ch.impl?"Praktik pada Ubuntu Server nyata (VM).":"Latihan analisis dan diagram.")+" Rencana latihan:</p>"+ul(ch.objs.map((o,i)=>"Latihan "+(i+1)+": "+esc(o))));
+    h+=sec(12,"Assessment","<p><code class='i'>"+ch.asm+"</code> Pertanyaan final belum ditulis. Assessment direncanakan mengukur:</p>"+ul(ch.objs.map(esc)));
+  }else{
+    h+=sec(4,"Materi Teori",(c.theory||[]).join("")||"<p>-</p>");
+    h+=sec(5,"Praktik dan Implementasi","<h3>Checklist persiapan</h3>"+checklist(ch.id,"p",prepItems(ch))+(c.steps?"<ol>"+c.steps.map(x=>"<li>"+x+"</li>").join("")+"</ol>":""));
+    h+=sec(6,"Perintah Linux",(c.cmds||[]).map(x=>codeBlock({ctx:x.ctx,label:x.label,code:x.code})+(x.out?codeBlock({ctx:"output",label:"Output",code:x.out}):"")).join("")||"<p>-</p>");
+    h+=sec(7,"Konfigurasi",(c.cfgs||[]).map(x=>codeBlock({ctx:"config",label:x.path,code:x.code})+(x.explain?"<p>"+x.explain+"</p>":"")).join("")||"<p>-</p>");
+    h+=sec(8,"Verifikasi",ul(c.verify||[]));
+    h+=sec(9,"Troubleshooting",(c.trouble||[]).length?'<div class="tw"><table><thead><tr><th>Gejala</th><th>Diagnosis</th><th>Perbaikan</th></tr></thead><tbody>'+c.trouble.map(t=>"<tr><td>"+t.gejala+"</td><td>"+t.diagnosis+"</td><td>"+t.perbaikan+"</td></tr>").join("")+"</tbody></table></div>":"<p>-</p>");
+    h+=sec(10,"Security Review",ul(c.security||[]));
+    h+=sec(11,"Latihan",ul(c.exercises||[]));
+    h+=sec(12,"Assessment",ul(c.assessment||[]));
+  }
+  /* 13 */
+  const done=ch.objs.map(o=>"Mampu: "+esc(o)).concat(["Deliverable chapter selesai: "+(ch.impl?"berkas konfigurasi terdokumentasi dan bukti verifikasi (output disanitasi)":"ringkasan konsep dan jawaban assessment")]);
+  if(ch.impl)done.push("Sintaks tervalidasi, service sehat, dan log diperiksa","Verifikasi keamanan dijalankan dan pemulihan dari kegagalan umum dicoba");
+  done.push("Tidak ada kredensial atau kunci privat dalam catatan maupun bukti");
+  h+=sec(13,"Checklist Kelulusan",checklist(ch.id,"c",done)+'<p class="rc">Menyelesaikan checklist tidak mengubah status otomatis. Ubah status secara manual. Status ini hanya pelacak belajar.</p>');
+  /* 14 */
+  h+=sec(14,"Referensi Resmi",refsList(ch.mod.refs,c&&c.refs)+'<p class="rc">Tautan mengarah ke situs dokumentasi resmi. Validasi detail versi terhadap paket terpasang saat implementasi.</p>');
+  h+='<div class="pager noprint">'+(prev?'<a class="btn" href="#'+prev.id+'">← '+esc(prev.title)+"</a>":"<span></span>")+(next?'<a class="btn pri" href="#'+next.id+'">Chapter berikutnya: '+esc(next.title)+" →</a>":"")+"</div>";
+  return h;
+}
+function prepItems(ch){
+  const a=["Prasyarat chapter sudah dipahami","Dokumentasi resmi pada versi yang dipakai sudah dibuka"];
+  if(ch.impl){a.unshift("VM lab aktif dan snapshot dibuat sebelum perubahan","Akses sebagai pengguna non-root dengan sudo tersedia");}
+  if(ch.mod.env==="dom"||ch.mod.env==="pub"||ch.mod.env==="prod")a.push("Domain yang saya kendalikan dan akses panel DNS tersedia");
+  if(ch.mod.env==="pub"||ch.mod.env==="prod")a.push("VPS dengan IP publik tersedia; kebijakan port 25 dan opsi PTR sudah dikonfirmasi ke penyedia");
+  return a;
+}
+
+/* ===== Tampilan: Kategori ===== */
+function renderCat(cat){
+  const cs=catStats(cat);
+  let h='<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Beranda</a></li><li aria-current="page">'+cat.id+"</li></ol></nav><h2 class='pt'>"+cat.id+" · "+esc(cat.name)+'</h2><span class="badge">Level '+cat.lv+'</span><span class="badge">'+ENV[cat.env]+"</span>"+(cat.opt?'<span class="badge">Opsional (spesialisasi)</span>':"")+'<span class="badge">'+cat.mods.length+" modul · "+cat.chs.length+" chapter · "+fmt(cat.min)+'</span><span class="badge">'+cs.d+"/"+cs.t+" selesai</span>";
+  const lu=lvlUrl(cat.id);
+  if(lu)h+='<div class="infobox"><strong>Materi level tersedia.</strong> <a class="btn pri" href="'+esc(lu)+'">Buka materi level</a></div>';
+  h+=sec("A","Tujuan Pembelajaran",ul(cat.obj.map(esc)));
+  h+=sec("B","Prasyarat",cat.preCats.length?ul(cat.preCats.map(p=>'<a href="#'+p.id+'">'+p.id+" · "+esc(p.name)+"</a>")):"<p>Tidak ada; titik awal.</p>");
+  h+=sec("C","Modul dan Chapter",cat.mods.map(m=>"<h3>"+m.id+" · "+esc(m.title)+(m.opt?" (opsional)":"")+'</h3><ul class="cl">'+m.chs.map(c=>'<li><a href="#'+c.id+'">'+c.id+" · "+esc(c.title)+"</a> "+badge(st(c.id))+" <small>"+fmt(c.min)+"</small>"+(matUrl(c.id)?' <a href="'+esc(matUrl(c.id))+'">Buka materi</a>':"")+"</li>").join("")+"</ul>").join(""));
+  h+=sec("D","Deliverable Praktis",'<p>'+esc(cat.dl)+"</p>");
+  h+=sec("E","Kriteria Penyelesaian","<p>"+esc(cat.crit)+"</p>");
+  h+=sec("F","Catatan Keamanan","<p>"+esc(cat.sec)+"</p>");
+  if(cat.id==="CAT-13")h+=sec("G","Jadwal Pemeliharaan (rencana cakupan)",'<p class="rc">Rencana topik, bukan prosedur final.</p><div class="tw"><table><thead><tr><th>Periode</th><th>Cakupan</th></tr></thead><tbody>'+SCHED.map(r=>"<tr><td>"+r[0]+"</td><td>"+esc(r[1])+"</td></tr>").join("")+"</tbody></table></div><p>Format runbook: gejala, diagnosis, tindakan korektif, validasi, kriteria eskalasi.</p>");
+  if(cat.id==="CAT-16")h+=sec("G","Kriteria Penerimaan Capstone",'<div class="tw"><table><thead><tr><th>#</th><th>Area</th><th>Kriteria terukur</th></tr></thead><tbody>'+CAPSTONE.map((r,i)=>"<tr><td>"+(i+1)+"</td><td>"+esc(r[0])+"</td><td>"+esc(r[1])+"</td></tr>").join("")+'</tbody></table></div><p>Bukti yang diserahkan: dokumentasi konfigurasi, diagram arsitektur, log tersanitasi, hasil uji, checklist keamanan, bukti backup/restore, dan runbook akhir. <strong>Jangan pernah menyerahkan password, kunci privat, token, atau secrets hidup.</strong></p>');
+  return h;
+}
+
+/* ===== Tampilan: Beranda ===== */
+function renderHome(){
+  const s=stats(),lv=curLevel(),tot=CHS.reduce((a,c)=>a+c.min,0);
+  let h='<h2 class="pt">Peta Kurikulum</h2><p>Jalur belajar dari nol hingga operasi produksi mail server di Ubuntu Server. Rilis referensi: <strong>'+esc(REL)+"</strong>. Default: Postfix, Dovecot, Roundcube (opsional), Rspamd (rekomendasi untuk spam filtering).</p>";
+  h+='<dl class="metrics"><div><dt>Kategori</dt><dd>'+CAT.length+"</dd></div><div><dt>Modul</dt><dd>"+MODS.length+"</dd></div><div><dt>Chapter</dt><dd>"+s.total+"</dd></div><div><dt>Selesai</dt><dd>"+s.done+"</dd></div><div><dt>Sedang berjalan</dt><dd>"+s.prog+"</dd></div><div><dt>Progres (wajib: "+s.coreDone+"/"+s.coreTotal+")</dt><dd>"+s.pct+'%</dd></div><div><dt>Opsional selesai</dt><dd>'+s.optDone+" <small>/ "+s.optTotal+"</small></dd></div>"+'<div><dt>Level saat ini</dt><dd><small>'+(lv?"L"+lv.lv+" · "+esc(lv.name):"Semua selesai")+"</small></dd></div><div><dt>Estimasi total</dt><dd>"+Math.round(tot/60)+" <small>jam</small></dd></div></dl>";
+  h+='<p class="warnbox">Estimasi durasi hanya perkiraan. Durasi nyata bergantung pada pengalaman sebelumnya dan jumlah latihan lab. Persentase progres hanya menghitung chapter wajib; chapter opsional dilaporkan terpisah. Status chapter adalah pelacak belajar, bukan indikator kesiapan server. Progres tersimpan di browser ini; ekspor JSON secara berkala.</p>';
+  if(filterOn()){
+    const r=CHS.filter(match);
+    h+=sec("*","Hasil Filter ("+r.length+")",r.length?'<ul class="cl">'+r.map(c=>'<li><a href="#'+c.id+'">'+c.id+" · "+esc(c.title)+"</a> "+badge(st(c.id))+"</li>").join("")+"</ul>":"<p>Tidak ada chapter yang cocok.</p>");
+  }
+  h+=sec("▦","Roadmap Kategori",'<div class="tw"><table><thead><tr><th>ID</th><th>Level</th><th>Kategori</th><th>Lingkungan</th><th>Modul</th><th>Chapter</th><th>Durasi</th><th>Progres</th></tr></thead><tbody>'+CAT.map(c=>{const x=catStats(c);return '<tr><td><a href="#'+c.id+'">'+c.id+"</a></td><td>L"+c.lv+"</td><td>"+esc(c.name)+(c.opt?" <em>(opsional)</em>":"")+"</td><td>"+ENV[c.env]+"</td><td>"+c.mods.length+"</td><td>"+c.chs.length+"</td><td>"+fmt(c.min)+'</td><td><div class="bar" role="progressbar" aria-label="Progres '+c.id+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+x.pct+'"><i style="width:'+x.pct+'%"></i></div>'+x.d+"/"+x.t+"</td></tr>";}).join("")+"</tbody></table></div>");
+  return h;
+}
+
+/* ===== Tampilan: Panduan ===== */
+function renderAbout(){
+  const stages=[["1","Lab lokal (VM)","CAT-01 s.d. CAT-07","Lab lokal / jaringan privat","Mail flow lokal berfungsi dan relay terbukti tertutup"],["2","Lab + domain","CAT-08, CAT-09","Domain milik sendiri","TLS valid, SPF/DKIM/DMARC terbaca"],["3","Hardening dan operasi dasar","CAT-10, CAT-11","Lab","Kontrol keamanan terverifikasi, backup teruji restore"],["4","Uji publik","CAT-12 (modul pertama)","VPS, IP publik, PTR, port 25 terbuka","Konektivitas luar dan FCrDNS valid"],["5","Produksi","CAT-12 (go-live), CAT-13, CAT-14","Produksi","Checklist go-live lengkap, runbook, monitoring aktif"]];
+  const svg='<svg class="diag" viewBox="0 0 900 300" role="img" aria-labelledby="dt dd"><title id="dt">Alur pengiriman email</title><desc id="dd">Pesan mengalir dari MUA pengirim ke MSA, MTA pengirim, MTA penerima, MDA dan Maildir, lalu diambil MUA penerima via IMAP. MTA pengirim mencari MX lewat DNS.</desc><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z"/></marker></defs>'+
+  [["MUA pengirim","klien email",20,40],["MSA","Postfix :587/465",190,40],["MTA pengirim","Postfix",360,40],["MTA penerima","Postfix :25",530,40],["MDA","Dovecot (LMTP)",700,40],["DNS","MX, A/AAAA",360,200],["Maildir","penyimpanan",700,200],["MUA penerima","IMAPS :993",530,200]].map((b,i)=>'<rect class="'+(i===0||i===7?"hi":"")+'" x="'+b[2]+'" y="'+b[3]+'" width="140" height="60" rx="8"/><text x="'+(b[2]+70)+'" y="'+(b[3]+26)+'">'+b[0]+'</text><text class="sm" x="'+(b[2]+70)+'" y="'+(b[3]+45)+'">'+b[1]+"</text>").join("")+
+  '<path d="M160 70H188" marker-end="url(#ar)"/><path d="M330 70H358" marker-end="url(#ar)"/><path d="M500 70H528" marker-end="url(#ar)"/><path d="M670 70H698" marker-end="url(#ar)"/><path d="M430 200V132" marker-end="url(#ar)"/><path d="M770 100V198" marker-end="url(#ar)"/><path d="M700 230H672" marker-end="url(#ar)"/></svg>';
+  let h='<h2 class="pt">Panduan dan Referensi Cepat</h2>';
+  h+=sec(1,"Profil Pembelajar dan Cara Memakai",ul(["Profil: administrator atau mahasiswa TI yang nyaman memakai komputer; pengalaman Linux tidak diwajibkan karena Level 1 membangunnya.","Kebutuhan: host dengan virtualisasi untuk lab; domain milik sendiri dan VPS dengan IP publik mulai tahap uji publik.","Gunakan sidebar untuk navigasi, pencarian, dan filter (belum selesai, siap dipelajari berdasarkan prasyarat).","Ubah status chapter dan centang checklist; progres tersimpan di browser dan dapat diekspor atau diimpor sebagai JSON.","Seluruh chapter saat ini berupa spesifikasi. Detail lesson ditambahkan bertahap."]));
+  h+=sec(2,"Penambahan Materi Chapter",'<p>Materi setiap chapter mengikuti struktur 14 bagian dan diisikan ke objek <code class="i">CONTENT</code> pada berkas ini (kunci = ID chapter). ID, prasyarat, dan struktur kurikulum tetap konsisten.</p><details class="note"><summary>Skema CONTENT</summary><pre><code>'+esc('CONTENT["CH-06-01-02"] = {\n  theory:[html], steps:[html],\n  cmds:[{ctx:"user"|"root", label, code, out}],\n  cfgs:[{path, code, explain}],\n  verify:[html], trouble:[{gejala, diagnosis, perbaikan}],\n  security:[html], exercises:[html], assessment:[html],\n  refs:[{t, u}]\n};')+"</code></pre></details>");
+  h+=sec(3,"Arsitektur Email",svg+"<ol><li>MUA mengirim pesan ke MSA (submission, terautentikasi, TLS).</li><li>MTA pengirim mencari MX domain tujuan lewat DNS.</li><li>MTA pengirim menyerahkan pesan ke MTA penerima via SMTP (port 25).</li><li>MTA penerima menyerahkan ke MDA (Dovecot via LMTP) dan disimpan sebagai Maildir.</li><li>MUA penerima mengambil pesan via IMAP (IMAPS 993).</li></ol>");
+  h+=sec(4,"Port dan Layanan",'<div class="tw"><table><thead><tr><th>Port</th><th>Layanan</th><th>Fungsi</th><th>Catatan</th></tr></thead><tbody><tr><td>25</td><td>SMTP</td><td>Transfer antar-MTA</td><td>Bukan untuk submission klien; relay harus tertutup</td></tr><tr><td>587</td><td>Submission</td><td>Klien kirim email (STARTTLS)</td><td>Wajib autentikasi dan TLS</td></tr><tr><td>465</td><td>Submissions</td><td>Submission dengan implicit TLS</td><td>Wajib autentikasi</td></tr><tr><td>993</td><td>IMAPS</td><td>Akses mailbox terenkripsi</td><td>Disarankan</td></tr><tr><td>143 / 110</td><td>IMAP / POP3</td><td>Akses mailbox</td><td>Hanya dengan TLS; atau tutup</td></tr><tr><td>995</td><td>POP3S</td><td>POP3 terenkripsi</td><td>Opsional</td></tr><tr><td>80 / 443</td><td>HTTP / HTTPS</td><td>Validasi sertifikat (HTTP-01) dan webmail</td><td>Webmail hanya via HTTPS</td></tr><tr><td>22</td><td>SSH</td><td>Administrasi</td><td>Kunci saja; batasi sumber</td></tr></tbody></table></div>');
+  h+=sec(5,"DNS: Routing vs Autentikasi",'<div class="tw"><table><thead><tr><th>Record</th><th>Contoh nama</th><th>Fungsi</th><th>Kelompok</th></tr></thead><tbody><tr><td>A / AAAA</td><td>mail.&lt;DOMAIN&gt;</td><td>Alamat host mail</td><td>Routing</td></tr><tr><td>MX</td><td>&lt;DOMAIN&gt;</td><td>Tujuan pengiriman domain</td><td>Routing</td></tr><tr><td>PTR</td><td>reverse IP</td><td>Nama balik untuk IP (FCrDNS)</td><td>Reputasi dan routing pendukung</td></tr><tr><td>TXT (SPF)</td><td>&lt;DOMAIN&gt;</td><td>Server yang berwenang mengirim</td><td>Autentikasi</td></tr><tr><td>TXT (DKIM)</td><td>&lt;SELECTOR&gt;._domainkey.&lt;DOMAIN&gt;</td><td>Kunci publik tanda tangan</td><td>Autentikasi</td></tr><tr><td>TXT (DMARC)</td><td>_dmarc.&lt;DOMAIN&gt;</td><td>Kebijakan dan pelaporan</td><td>Autentikasi</td></tr></tbody></table></div><p class="warnbox">SPF, DKIM, dan DMARC tidak menjamin inbox placement. Tidak ada jaminan pengiriman ke Gmail, Outlook, atau penyedia lain. IP rumah, IP dinamis, PTR hilang, port SMTP diblokir, dan reputasi IP buruk dapat menghalangi pengiriman yang andal.</p>');
+  h+=sec(6,"Jalur dari Lab ke Produksi",'<div class="tw"><table><thead><tr><th>#</th><th>Tahap</th><th>Kategori</th><th>Syarat</th><th>Kriteria lanjut</th></tr></thead><tbody>'+stages.map(r=>"<tr>"+r.map(x=>"<td>"+esc(x)+"</td>").join("")+"</tr>").join("")+"</tbody></table></div>");
+  h+=sec(7,"Preventif, Detektif, Korektif",'<div class="tw"><table><thead><tr><th>Jenis</th><th>Tujuan</th><th>Contoh</th></tr></thead><tbody><tr><td>Preventif</td><td>Mencegah kejadian</td><td>Firewall, SSH kunci, pembatasan relay, TLS wajib</td></tr><tr><td>Detektif</td><td>Mendeteksi kejadian</td><td>Log, monitoring antrian, alert volume keluar</td></tr><tr><td>Korektif</td><td>Memulihkan</td><td>Restore backup, rotasi secrets, incident response</td></tr></tbody></table></div>');
+  h+=sec(8,"Contoh Format Blok Kode",'<p>Berikut format yang akan dipakai chapter nanti. Placeholder ditulis <code class="i">&lt;HURUF-KAPITAL&gt;</code>. Tidak ada perintah yang dijalankan dari halaman ini. Contoh bersifat ilustrasi format, bukan materi chapter.</p>'+codeBlock({ctx:"user",label:"Melihat port listening",code:"ss -tuln"})+codeBlock({ctx:"root",label:"Memperbarui daftar paket",code:"sudo apt update"})+codeBlock({ctx:"config",label:"/etc/contoh/berkas.conf",code:"nama_direktif = <NILAI-ANDA>"})+codeBlock({ctx:"output",label:"Output",code:"(Output nyata ditampilkan dan diverifikasi pada chapter yang sudah diimplementasikan.)"}));
+  return h;
+}
+
+/* ===== Router ===== */
+function route(focus){
+  let h=location.hash.slice(1);
+  try{h=decodeURIComponent(h);}catch(e){h="/";}
+  h=h||"/";
+  const m=$("#main");let html,title="Kurikulum Mail Server dengan Ubuntu Server";
+  const o=byId.get(h);
+  if(h==="/tentang"){curId="";html=renderAbout();title="Panduan · "+title;}
+  else if(o&&h.startsWith("CH-")){curId=h;html=renderChapter(o);title=o.id+" · "+o.title;}
+  else if(o&&h.startsWith("CAT-")){curId=h;html=renderCat(o);title=o.id+" · "+o.name;}
+  else{curId="";html=renderHome();}
+  m.innerHTML=html;document.title=title;
+  if(focus){window.scrollTo(0,0);m.focus({preventScroll:true});$("#routeAnn").textContent=title;}
+  renderNav();updateHeader();
+}
+
+/* ===== Event ===== */
+document.addEventListener("click",e=>{
+  const jp=e.target.closest("a[data-jump],a.skip");
+  if(jp){
+    const t=document.getElementById(jp.getAttribute("href").slice(1));
+    if(t){e.preventDefault();t.scrollIntoView();if(t.id==="main"||!t.hasAttribute("tabindex"))t.setAttribute("tabindex","-1");t.focus({preventScroll:true});}
+    return;
+  }
+  const tg=e.target.closest("[data-tg]");
+  if(tg){const id=tg.getAttribute("data-tg"),ex=tg.getAttribute("aria-expanded")==="true",pn=document.getElementById((id.startsWith("CAT")?"c-":"m-")+id);tg.setAttribute("aria-expanded",!ex);if(pn)pn.hidden=ex;ex?openSet.delete(id):openSet.add(id);return;}
+  const cp=e.target.closest("[data-copy]");
+  if(cp){const t=cp.closest("figure").querySelector("code").textContent;copyText(t).then(()=>{cp.textContent="Tersalin";setTimeout(()=>cp.textContent="Salin",1500);},()=>toast("Gagal menyalin; salin manual."));return;}
+  if(e.target.closest("#side a")&&document.body.classList.contains("nav-open"))setNav(false);
+});
+function copyText(t){
+  if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(t);
+  return new Promise((res,rej)=>{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(x){}ta.remove();ok?res():rej();});
+}
+document.addEventListener("change",e=>{
+  const s=e.target.closest("[data-status]");
+  if(s){const id=s.getAttribute("data-status"),v=+s.value;if(v)state.status[id]=v;else delete state.status[id];save();const y=window.scrollY;route(false);window.scrollTo(0,y);return;}
+  const c=e.target.closest("[data-ck]");
+  if(c){const id=c.getAttribute("data-ck"),k=c.getAttribute("data-k");state.checks[id]=state.checks[id]||{};if(c.checked)state.checks[id][k]=true;else delete state.checks[id][k];save();}
+});
+window.addEventListener("hashchange",()=>{route(true);});
+/* Sinkronisasi antar tab: muat ulang progres bila tab lain menyimpannya, agar save() tidak menimpa dengan data usang. */
+window.addEventListener("storage",e=>{
+  if(e.key!==null&&e.key!==KEY)return;
+  loadState();const y=window.scrollY;route(false);window.scrollTo(0,y);
+});
+function setNav(o){document.body.classList.toggle("nav-open",o);$("#menuBtn").setAttribute("aria-expanded",o);}
+$("#menuBtn").addEventListener("click",()=>setNav(!document.body.classList.contains("nav-open")));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("nav-open")){setNav(false);$("#menuBtn").focus();}});
+document.body.addEventListener("click",e=>{if(document.body.classList.contains("nav-open")&&!e.target.closest("#side")&&!e.target.closest("#menuBtn"))setNav(false);});
+
+function refilter(){renderNav();if(!curId&&location.hash.slice(1)!=="/tentang"){const y=window.scrollY;$("#main").innerHTML=renderHome();window.scrollTo(0,y);}}
+$("#fq").addEventListener("input",e=>{F.q=e.target.value.trim();refilter();});
+$("#fcat").innerHTML='<option value="">Semua kategori</option>'+CAT.map(c=>'<option value="'+c.id+'">L'+c.lv+" · "+esc(c.name)+"</option>").join("");
+$("#fst").innerHTML='<option value="">Semua status</option>'+STATUS.map((s,i)=>'<option value="'+i+'">'+s+"</option>").join("");
+$("#fcat").addEventListener("change",e=>{F.cat=e.target.value;refilter();});
+$("#fst").addEventListener("change",e=>{F.status=e.target.value;refilter();});
+$("#qInc").addEventListener("click",()=>{F.inc=!F.inc;refilter();});
+$("#qReady").addEventListener("click",()=>{F.ready=!F.ready;refilter();});
+$("#qClear").addEventListener("click",()=>{F.q="";F.cat="";F.status="";F.inc=false;F.ready=false;$("#fq").value="";$("#fcat").value="";$("#fst").value="";refilter();});
+
+/* ===== Tema ===== */
+function setTheme(t){if(t!=="dark"&&t!=="light")t="light";document.documentElement.setAttribute("data-theme",t);$("#themeBtn").setAttribute("aria-pressed",t==="dark");$("#themeBtn").textContent=t==="dark"?"Mode terang":"Mode gelap";store.set(TKEY,t);}
+setTheme(["dark","light"].includes(store.get(TKEY))?store.get(TKEY):(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+$("#themeBtn").addEventListener("click",()=>setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"));
+
+/* ===== Ekspor / Impor / Reset ===== */
+$("#expBtn").addEventListener("click",()=>{
+  const d={app:APP,version:1,exportedAt:new Date().toISOString(),status:state.status,checks:state.checks};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:"application/json"}));a.download="progres-kurikulum-mail-server.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast("Progres diekspor.");
+});
+$("#impBtn").addEventListener("click",()=>$("#impFile").click());
+$("#impFile").addEventListener("change",e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let d;try{d=JSON.parse(r.result);}catch(x){toast("Berkas bukan JSON yang valid.");return;}
+    if(!d||d.app!==APP||typeof d.status!=="object"){toast("Format progres tidak dikenali.");return;}
+    if(!confirm("Impor akan menimpa progres saat ini. Lanjutkan?"))return;
+    state=sanitize(d);save();route(false);toast("Progres diimpor.");
+  };
+  r.onerror=()=>toast("Gagal membaca berkas.");
+  r.readAsText(f);
+});
+$("#rstBtn").addEventListener("click",()=>{
+  if(!confirm("Reset seluruh progres belajar? Tindakan ini tidak dapat dibatalkan. Ekspor dulu bila perlu."))return;
+  state={status:{},checks:{}};save();route(false);toast("Progres direset.");
+});
+
+/* ===== Mulai ===== */
+function setHH(){const h=document.getElementById("top").offsetHeight;document.documentElement.style.setProperty("--hh",h+"px");}
+window.addEventListener("resize",setHH);
+loadState();setHH();route(false);
+fetch("materi/chapters.json").then(r=>r.ok?r.json():null).then(d=>{
+  if(d&&d.schema===1&&d.chapters&&typeof d.chapters==="object"){PUB=d.chapters;if(d.levels&&typeof d.levels==="object")LVL=d.levels;const y=window.scrollY;route(false);window.scrollTo(0,y);}
+}).catch(()=>{});
+</script>
+</body>
+</html>
