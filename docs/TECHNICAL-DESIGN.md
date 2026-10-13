@@ -4,7 +4,7 @@
 |---|---|
 | **Versi** | 0.1 (draf, belum ada implementasi) |
 | **Tanggal** | 2026-10-13 |
-| **Dasar** | `docs/PRD.md` (PRD v0.1) dan `docs/project-audit.md` |
+| **Dasar** | `docs/PRD.md` (PRD v0.2) dan `docs/project-audit.md` |
 | **Status** | Menunggu persetujuan sebelum implementasi |
 | **Aturan dokumen** | Tidak ada kode, konfigurasi, atau berkas build yang dibuat berdasarkan dokumen ini sebelum dokumen disetujui dan keselarasannya dengan PRD terkonfirmasi (bagian 2) |
 
@@ -44,11 +44,11 @@ Isi materi per chapter, desain visual dashboard, dan keputusan produk yang masih
 
 ## 2. Keselarasan dengan PRD
 
-Rancangan ini memenuhi PRD pada hampir semua persyaratan. **Enam persyaratan PRD perlu diamandemen** karena batasan C-01, C-09, dan C-10 menutup jalur yang diasumsikan PRD. Amandemen diusulkan, belum diterapkan ke PRD.
+Rancangan ini memenuhi PRD pada hampir semua persyaratan. Enam persyaratan PRD diamandemen karena batasan C-01, C-09, dan C-10 menutup jalur yang diasumsikan PRD v0.1. **Amandemen A1-A6 sudah diterapkan ke PRD v0.2** (2026-10-13); tabel berikut mencatat alasannya.
 
-### 2.1 Amandemen PRD yang diusulkan
+### 2.1 Amandemen PRD (diterapkan pada PRD v0.2)
 
-| ID | PRD saat ini | Konflik | Rancangan di dokumen ini | Usulan amandemen |
+| ID | PRD v0.1 | Konflik | Rancangan di dokumen ini | Amandemen yang diterapkan |
 |---|---|---|---|---|
 | A1 | FR-050, FR-051, INT-05, M2: `data/curriculum.json` adalah satu-satunya sumber; dashboard diturunkan darinya | C-01: sumber dashboard tetap berkas HTML yang saat ini memuat datanya sendiri (blok `/*DATA-START*/…/*DATA-END*/`) | **Blok data di HTML tetap menjadi sumber tunggal.** Build mengekstraknya (hanya baca) menjadi `.build/curriculum.json` berobjek bernama, divalidasi JSON Schema. Berkas itu artefak turunan, bukan sumber | Ubah FR-050 menjadi "satu sumber = blok data pada berkas dashboard; artefak `curriculum.json` diturunkan saat build". FR-051 berlaku untuk artefak |
 | A2 | M3, PRG-03, INT-03: kode progres di satu modul bersama; HTML dipecah menjadi `index.html`, JS, CSS | C-01 dan keharusan menyalin HTML apa adanya (bagian 8.2 langkah 8) | Dashboard tetap satu berkas. Halaman materi memakai `materi/assets/progress.js` dengan **kontrak yang sama**; kesamaan perilaku dijaga uji kontrak (bagian 11.4), bukan berbagi kode | Turunkan PRG-03/INT-03 dari MUST menjadi SHOULD; tambah persyaratan uji kontrak; ubah M3 menjadi "kontrak progres dan skrip materi" |
@@ -339,6 +339,7 @@ Dibuat pada langkah 5 build **dengan memindai berkas hasil build**, bukan dari s
 }
 ```
 
+- Ekstensi implementasi saat ini (skema tetap 1, aditif): kunci `levels` memetakan `CAT-NN` ke `{path: "level/L<n>/", title}` untuk halaman ringkasan level (`materi/level/L<n>.md`). Dashboard memakainya untuk tombol "Buka materi level" pada tampilan kategori.
 - `path` relatif terhadap `BASE materi/`. Tidak ada URL absolut, sehingga sama di semua host.
 - Kunci terurut; tanpa tanda waktu atau hash komit (deterministik).
 - Jika `materi/chapters.json` tidak dapat dimuat, dashboard tidak menampilkan tautan materi dan seluruh fitur lain berjalan (FR-055).
@@ -758,7 +759,7 @@ Satu bab bermasalah: ubah `status` menjadi `draft` pada PR cepat. Build mengelua
 
 ### 14.4 Kriteria kesiapan implementasi
 
-Implementasi dimulai bila: (1) dokumen ini disetujui, (2) amandemen A1…A6 diterima atau ditolak secara eksplisit dan PRD disesuaikan, (3) spike T-01 dan T-09 selesai.
+Implementasi dimulai bila: (1) dokumen ini disetujui, (2) amandemen A1…A6 (sudah diterapkan ke PRD v0.2) dikonfirmasi pemilik produk, (3) spike T-01 dan T-09 selesai.
 
 ---
 
@@ -786,3 +787,21 @@ Implementasi dimulai bila: (1) dokumen ini disetujui, (2) amandemen A1…A6 dite
 | Bab terbit | Bab dengan `status: published` yang halamannya benar-benar ada di `site/materi/chapter/<ID>/` |
 | `BASE` | Awalan path situs (`/` atau `/<repo>/`) |
 | Byte-identik | Hash SHA-256 salinan sama dengan hash sumber (setelah akhir baris LF terkendali oleh `.gitattributes`) |
+
+---
+
+## 15. Status Implementasi (diperbarui 2026-10-13)
+
+Konfigurasi MkDocs dibangun ulang secara minimal. Bagian 1-14 tetap menjadi rancangan target; tabel berikut mencatat keadaan nyata.
+
+| Komponen | Rancangan | Keadaan nyata |
+|---|---|---|
+| Konfigurasi MkDocs | `mkdocs.yml` + `.build/mkdocs.generated.yml` (`INHERIT`) | Hanya `mkdocs.yml` dengan `nav` manual (beranda, L0, L1, dan `CH-03-01-01`); diagram Mermaid memakai `custom_fences` `pymdownx.superfences` (Material memuat pustaka mermaid@11 dari unpkg saat halaman dibuka). `INHERIT` dan generator belum dibuat karena belum ada bab; T-01 sebagian terjawab: `site_dir: site/materi`, `docs_dir: materi`, dan `site_url: !ENV [SITE_URL, null]` bekerja pada MkDocs 1.6.1 |
+| Perakitan dashboard | `tools/build.mjs` (Node) | `scripts/copy-dashboard.py` (Python, sudah ada) menyalin dashboard ke `site/index.html`; alat Node belum dibuat |
+| Dashboard | Tidak diubah build | Tautan header "Materi" (`href="materi/"`, relatif) dan pemuatan `materi/chapters.json` (opsional, gagal-aman) yang menampilkan tombol "Buka materi" pada bab terbit |
+| `chapters.json` | Bagian 6.3 | `scripts/generate-chapters-json.py` memindai front matter dan hasil build; bab terbit: L0 (`CH-01-01-*`), L1 (`CH-02-*`), dan `CH-03-01-01`; ringkasan level `L0`, `L1` |
+| Ekstraktor, validator front matter/14 heading, generator `nav` | Bagian 4.3, 4.4.1 | Belum dibuat; `nav` masih manual |
+| CI/CD Pages, Vercel, `.gitattributes` | Bagian 9 | Belum dibuat |
+| Versi | Dikunci di `requirements.txt` | `mkdocs==1.6.1`, `mkdocs-material==9.7.7`, `pymdown-extensions==11.0.2` (dependensi transitif belum dikunci dengan hash) |
+
+Temuan pendukung T-04 dan A-05: `sitemap.xml.gz` adalah satu-satunya berkas yang berbeda antar build; MkDocs Material 9.7.7 menampilkan peringatan tentang MkDocs 2.0 (tanpa dukungan plugin/tema), sehingga versi MkDocs harus tetap `<2`. Perbedaan penataan folder: `CLAUDE.md` menyebut berkas bab "di bawah kategori yang sesuai" sedangkan bagian 4.1 menetapkan `materi/chapter/CH-NN-NN-NN.md`; keputusan diperlukan sebelum bab pertama.

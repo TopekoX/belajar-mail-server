@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Versi** | 0.1 (draf) |
+| **Versi** | 0.2 (draf). Menerapkan amandemen A1-A6 dari `docs/TECHNICAL-DESIGN.md` bagian 2.1 |
 | **Tanggal** | 2026-10-13 |
-| **Dasar** | `docs/project-audit.md` (audit awal) dan kondisi kode saat ini |
+| **Dasar** | `docs/project-audit.md` (audit awal), `docs/TECHNICAL-DESIGN.md` (rancangan teknis), dan kondisi kode saat ini |
 | **Status** | Menunggu persetujuan pemilik produk |
 | **Batasan dokumen** | Dokumen ini tidak mengubah implementasi yang ada. Pemisahan fitur yang sudah ada dan yang harus dikembangkan, serta metode uji tiap persyaratan, ada di **Lampiran C** |
 
@@ -77,7 +77,7 @@ Portal belajar berbahasa Indonesia yang memandu pembelajar dari nol sampai mampu
 
 **J5: Menambah satu chapter (P3)**
 1. Memilih chapter berstatus `draft`.
-2. Claude Code menulis berkas Markdown dari template, penulis menguji di VM.
+2. Perintah `scaffold` membuat stub dari template, Claude Code menulis isinya, penulis menguji di VM.
 3. Validasi otomatis lolos, status diubah menjadi `published`, perubahan digabung ke cabang utama.
 4. CI membangun dan menerbitkan; dashboard menampilkan tautan "Buka materi" untuk chapter itu.
 
@@ -91,7 +91,7 @@ Portal belajar berbahasa Indonesia yang memandu pembelajar dari nol sampai mampu
 |---|---|---|
 | G1 | Portal dapat dipublikasikan dan berfungsi di GitHub Pages | Semua AC deployment lolos (bagian 11) |
 | G2 | Materi ditulis dan dikelola sebagai Markdown, bukan string JS | 100% materi baru berada di `materi/` |
-| G3 | Struktur kurikulum punya satu sumber data | 0 duplikasi struktur antara dashboard dan `mkdocs.yml` |
+| G3 | Struktur kurikulum punya satu sumber data | 0 duplikasi struktur antara blok data dashboard dan `mkdocs.yml` |
 | G4 | Progres belajar tetap bekerja lintas dashboard dan dokumentasi | Status yang diubah di salah satu terlihat di yang lain |
 | G5 | Penambahan satu chapter per iterasi aman dan dapat diulang | Satu chapter dapat dirilis tanpa menyentuh chapter lain |
 | G6 | Kualitas dijaga otomatis | CI memvalidasi data, build, dan tautan pada setiap perubahan |
@@ -176,10 +176,10 @@ Prioritas: **M** = MUST, **S** = SHOULD, **C** = MAY. Status: **ADA** (sudah ada
 
 | ID | Persyaratan | Pri | Status |
 |---|---|---|---|
-| FR-050 | Struktur kurikulum MUST disimpan di satu berkas data (`data/curriculum.json` atau setara) sebagai satu-satunya sumber; dashboard, stub Markdown, dan `nav` MkDocs MUST diturunkan darinya. | M | BARU |
-| FR-051 | Data kurikulum MUST memakai objek bernama (bukan array posisional) dan divalidasi oleh JSON Schema. | M | BARU |
-| FR-052 | Generator MUST membuat stub Markdown untuk chapter baru dan MUST NOT menimpa berkas yang sudah ditulis. | M | BARU |
-| FR-053 | Generator MUST memperbarui bagian `nav` `mkdocs.yml` secara deterministik (keluaran sama untuk masukan sama). | M | BARU |
+| FR-050 | Struktur kurikulum MUST bersumber dari satu tempat: blok data pada berkas dashboard `kurikulum-mail-server-ubuntu.html` (di antara penanda `/*DATA-START*/` dan `/*DATA-END*/`). Build MUST mengekstraknya secara hanya-baca menjadi artefak turunan `.build/curriculum.json`; stub Markdown dan `nav` MkDocs MUST diturunkan dari artefak itu. Artefak MUST NOT dikomit. | M | BARU |
+| FR-051 | Artefak `curriculum.json` MUST memakai objek bernama (bukan array posisional) dan divalidasi oleh JSON Schema. Ekstraksi MUST gagal bila penanda blok data hilang atau tidak tunggal. | M | BARU |
+| FR-052 | Perintah `scaffold` (dijalankan manual, bukan bagian build) MUST membuat stub Markdown untuk chapter baru dan MUST NOT menimpa berkas yang sudah ada. | M | BARU |
+| FR-053 | Build MUST menghasilkan `nav` dan `exclude_docs` MkDocs secara deterministik ke `.build/mkdocs.generated.yml`, dan MUST NOT menulis ke berkas sumber (termasuk `mkdocs.yml`). | M | BARU |
 | FR-054 | Dashboard MUST menampilkan tautan "Buka materi" hanya untuk chapter berstatus `published`; untuk `draft` MUST menampilkan spesifikasi seperti sekarang. | M | BARU |
 | FR-055 | Dashboard MUST tetap berfungsi bila situs dokumentasi tidak tersedia (tautan materi gagal tidak boleh merusak fitur dashboard). | M | BARU |
 
@@ -192,6 +192,8 @@ Prioritas: **M** = MUST, **S** = SHOULD, **C** = MAY. Status: **ADA** (sudah ada
 | FR-062 | Skrip validasi SHOULD memindai berkas materi untuk pola yang terlihat seperti kredensial atau kunci privat (mis. blok `BEGIN PRIVATE KEY`) dan menggagalkan CI bila ditemukan. | S | BARU |
 | FR-063 | Repositori MUST memuat panduan penulisan chapter (template, gaya, aturan uji VM) yang dapat dipakai Claude Code tiap iterasi. | M | BARU |
 | FR-064 | Tiap iterasi MUST menyentuh satu chapter (satu berkas materi + perubahan metadata terkait), sehingga satu pull request = satu chapter. | S | BARU |
+| FR-065 | Build MUST NOT mengubah berkas sumber: manifes SHA-256 sumber sebelum dan sesudah build identik, dan `git status` bersih setelah build. | M | BARU |
+| FR-066 | Dua build dengan masukan dan lingkungan sama MUST menghasilkan keluaran identik (dibandingkan lewat manifes SHA-256 keluaran, dengan daftar pengecualian yang terdokumentasi). | M | BARU |
 
 ---
 
@@ -266,7 +268,7 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 ```
 
 - Sumber Markdown berada di `materi/`; `mkdocs.yml` memakai `docs_dir: materi`.
-- Build: `mkdocs build -d site/materi`, lalu dashboard disalin ke `site/index.html` beserta aset dan data. `docs/` (dokumen proyek seperti audit dan PRD) bukan bagian situs dan tidak dipublikasikan.
+- Build: `mkdocs build -d site/materi`, lalu `kurikulum-mail-server-ubuntu.html` disalin apa adanya (byte-identik) ke `site/index.html`. `docs/` (dokumen proyek seperti audit dan PRD) bukan bagian situs dan tidak dipublikasikan.
 - Dashboard dan dokumentasi berbagi **origin dan kunci `localStorage`** yang sama.
 
 **Alasan:** URL stabil, dashboard tetap berdiri sendiri, dan struktur sama dengan opsi B pada audit (satu sumber data).
@@ -277,11 +279,11 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 |---|---|---|
 | INT-01 | Dashboard MUST menautkan ke materi lewat pola URL tetap `<base>/materi/chapter/<CH-ID>/` yang dibuat dari ID chapter, tidak ditulis manual per chapter. | BARU |
 | INT-02 | Halaman materi MUST memuat skrip kecil bersama (`extra_javascript`) yang membaca dan menulis kunci progres yang sama dengan dashboard dan memakai skema yang sama (lihat bagian 9). | BARU |
-| INT-03 | Skrip bersama MUST dipakai dari satu berkas sumber oleh kedua sisi (tanpa salinan kode progres yang terpisah). | BARU |
+| INT-03 | Skrip halaman materi SHOULD berasal dari satu berkas sumber (`materi/assets/progress.js`); kesamaan perilakunya dengan dashboard MUST dijaga oleh uji kontrak (PRG-03). | BARU |
 | INT-04 | Tautan dari materi ke dashboard MUST memakai rute hash yang ada (`#CH-…`, `#CAT-…`, `#/`). | BARU |
-| INT-05 | Menambah satu chapter MUST hanya memerlukan: entri di `curriculum.json` (bila belum ada), berkas Markdown, dan menjalankan generator/validasi. Tidak ada edit manual ke `nav` atau ke kode dashboard. | BARU |
+| INT-05 | Menambah satu chapter MUST hanya memerlukan: berkas Markdown (dibuat dengan perintah `scaffold`), pengaturan front matter, dan entri pada blok data dashboard bila bab belum terdaftar. Tidak ada edit manual ke `nav`, `mkdocs.yml`, atau logika dashboard. | BARU |
 | INT-06 | Kegagalan memuat salah satu sisi (mis. 404 materi) MUST NOT menghapus atau merusak data progres. | BARU |
-| INT-07 | Dashboard SHOULD memuat data kurikulum dari `data/curriculum.json` lewat `fetch` dengan cadangan data tertanam, agar `file://` tetap dapat dipakai untuk pratinjau lokal bila diputuskan (lihat Q-02). | BARU |
+| INT-07 | Dashboard MUST menampilkan tautan "Buka materi" berdasarkan `materi/chapters.json`, daftar bab terbit yang dibuat saat build dengan memindai halaman hasil build. Berkas dimuat dengan `fetch` pada jalur relatif; kegagalan memuat MUST diabaikan tanpa memengaruhi fitur lain. Data kurikulum tetap tertanam di dashboard. | BARU |
 | INT-08 | Indeks pencarian isi (bila FR-011 diambil) MUST dihasilkan saat build dari Markdown berstatus `published` saja. | BARU |
 
 ---
@@ -298,7 +300,7 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 | URL-06 | Halaman 404 kustom MUST tersedia dan menautkan ke Beranda dan pencarian. | BARU |
 | URL-07 | Setiap halaman materi MUST memiliki `<link rel="canonical">` yang benar terhadap `site_url`. | BARU |
 | URL-08 | Pada GitHub Pages, berkas `.nojekyll` MUST ada bila publikasi tidak memakai build Jekyll. | BARU |
-| URL-09 | Nama berkas masuk dashboard di akar situs MUST `index.html`. | BARU |
+| URL-09 | Berkas keluaran dashboard di akar situs MUST bernama `index.html` dan MUST byte-identik dengan berkas sumber `kurikulum-mail-server-ubuntu.html`; nama berkas sumber tidak diubah. | BARU |
 | URL-10 | Rute dashboard dan URL materi MUST diuji pada dua konfigurasi: `/<repo>/` dan `/`. | BARU |
 
 ---
@@ -326,7 +328,7 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 |---|---|---|
 | PRG-01 | Skema progres versi 1 MUST dipertahankan; perubahan skema MUST menaikkan nomor versi dan menyertakan migrasi dari versi sebelumnya tanpa kehilangan data. | ADA |
 | PRG-02 | Berkas ekspor lama (versi 1) MUST tetap dapat diimpor pada semua rilis berikutnya. | ADA |
-| PRG-03 | Kode progres (muat, sanitasi, simpan, sinkronisasi antar tab, ekspor/impor) MUST berada di satu modul yang dipakai dashboard dan halaman materi. | BARU |
+| PRG-03 | Perilaku progres (muat, sanitasi, simpan, sinkronisasi antar tab, ekspor/impor) MUST identik pada dashboard dan halaman materi, dibuktikan oleh uji kontrak yang sama pada keduanya. Kode SHOULD dibagi dalam satu modul bila dashboard kelak dipecah; pada v1 dua implementasi diperbolehkan. | BARU |
 | PRG-04 | ID yang tidak lagi ada di kurikulum MUST diabaikan saat memuat (bukan menyebabkan error) dan SHOULD dipertahankan dalam penyimpanan bila memungkinkan untuk mencegah kehilangan data saat chapter dinonaktifkan sementara. **[Pertanyaan Q-07]** | SEBAGIAN |
 | PRG-05 | Perubahan progres di satu tab/halaman MUST disinkronkan ke tab/halaman lain dari origin yang sama lewat event `storage` dan MUST NOT menimpa perubahan yang lebih baru. | ADA\* |
 | PRG-06 | Penyimpanan MUST gagal dengan aman: error kuota atau akses ditolak MUST ditangkap, pengguna diberi tahu, dan aplikasi tetap berjalan (NFR-011). | SEBAGIAN |
@@ -342,7 +344,7 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 | JS-03 | Kode MUST dapat berjalan tanpa tahap kompilasi (tanpa bundler wajib). Bila bundler dipakai, keluarannya MUST tetap berupa berkas statis. | ADA |
 | JS-04 | Kode MUST NOT bergantung pada variabel global dari tema MkDocs Material selain API yang didokumentasikan (mis. `document$`) dan MUST bekerja dengan fitur navigasi instan bila diaktifkan. | BARU |
 | JS-05 | Halaman tanpa JavaScript MUST menampilkan konten materi (Markdown yang dirender) dan pesan jelas bahwa dashboard memerlukan JavaScript. | SEBAGIAN |
-| JS-06 | CSP target: tanpa `eval`; skrip inline hanya jika tidak ada alternatif dan MUST dapat dipindah ke berkas terpisah agar CSP ketat dapat diterapkan di Vercel. | BARU |
+| JS-06 | CSP target: tanpa `eval`. Skrip dan gaya inline dashboard dipertahankan; CSP ketat diterapkan di Vercel dengan hash SHA-256 skrip inline yang dihitung saat build (`script-src 'self' 'sha256-…'`). Pemindahan skrip ke berkas terpisah tidak diwajibkan. | BARU |
 | JS-07 | Konten HTML mentah (`CONTENT` atau Markdown dengan HTML) MUST dianggap tepercaya hanya jika berasal dari repositori; kontribusi pihak luar MUST melalui review sebelum digabung. | ADA |
 
 ---
@@ -355,7 +357,7 @@ https://<pengguna>.github.io/<repo>/materi/chapter/CH-06-01-02/
 |---|---|---|
 | DEP-01 | Repositori GitHub MUST menjadi sumber utama; cabang `main` dilindungi dan merupakan sumber rilis. | BARU |
 | DEP-02 | Deployment awal MUST ke GitHub Pages memakai GitHub Actions (bukan "deploy from branch"). | BARU |
-| DEP-03 | Alur CI MUST: pasang dependensi terkunci → validasi data → hasilkan stub/nav → `mkdocs build --strict` → rakit `site/` (dashboard + materi) → uji otomatis → unggah artefak Pages → deploy. | BARU |
+| DEP-03 | Alur CI MUST: pasang dependensi terkunci → validasi data dan materi → hasilkan `nav` → `mkdocs build --strict` → rakit `site/` (dashboard + materi) → uji otomatis → unggah artefak Pages → deploy. | BARU |
 | DEP-04 | Pull request MUST menjalankan semua langkah CI kecuali deploy produksi. | BARU |
 | DEP-05 | Deploy MUST gagal (dan situs lama tetap utuh) bila validasi atau build gagal. | BARU |
 | DEP-06 | Deployment ke Vercel MUST dimungkinkan hanya dengan menambah `vercel.json` (build command, `outputDirectory: site`, header) tanpa mengubah konten. Header keamanan (CSP, `X-Content-Type-Options`, `Referrer-Policy`) diatur di sana. | BARU |
@@ -414,13 +416,13 @@ Setiap kriteria dapat diverifikasi lulus/gagal. "Diuji pada" menyebut lingkungan
 
 | ID | Kriteria | Mencakup |
 |---|---|---|
-| AC-20 | `curriculum.json` lolos validasi JSON Schema; skrip validasi menyatakan 16 kategori, 36 modul, 136 chapter, 0 ID duplikat, 0 siklus prasyarat. Menambah ID duplikat atau prasyarat tidak ada membuat CI gagal. | FR-050, FR-051, FR-060 |
-| AC-21 | Menjalankan generator dua kali berturut-turut menghasilkan `nav` identik byte demi byte dan tidak mengubah berkas Markdown yang sudah ada isinya. | FR-052, FR-053 |
+| AC-20 | Artefak `curriculum.json` yang diekstrak dari blok data dashboard lolos validasi JSON Schema; skrip validasi menyatakan 16 kategori, 36 modul, 136 chapter, 0 ID duplikat, 0 siklus prasyarat. Menambah ID duplikat atau prasyarat tidak ada membuat CI gagal; menghapus salah satu penanda blok data membuat ekstraksi gagal. | FR-050, FR-051, FR-060 |
+| AC-21 | Menjalankan build dua kali berturut-turut menghasilkan `nav` identik byte demi byte dan tidak mengubah berkas sumber apa pun (termasuk `mkdocs.yml` dan Markdown yang sudah ada isinya). | FR-052, FR-053, FR-065 |
 | AC-22 | Setiap berkas `published` memiliki semua front matter wajib dan 14 heading wajib berurutan; berkas yang kekurangan satu heading membuat CI gagal. | FR-041, FR-042, FR-060 |
 | AC-23 | Berkas `published` tanpa `verified_on` membuat CI gagal. | FR-061 |
 | AC-24 | Menambahkan blok `-----BEGIN OPENSSH PRIVATE KEY-----` ke berkas materi membuat CI gagal. | FR-062 |
 | AC-25 | Dashboard menampilkan tautan "Buka materi" untuk 100% chapter `published` dan 0% untuk `draft`; setiap tautan menghasilkan HTTP 200 pada situs hasil build (diperiksa otomatis). | FR-054, INT-01 |
-| AC-26 | Satu chapter baru dapat ditambahkan dengan mengubah paling banyak 2 berkas selain `nav` yang dihasilkan: berkas Markdown dan (jika perlu) entri `curriculum.json`; `git diff` PR tidak menyentuh kode dashboard. | INT-05, FR-064 |
+| AC-26 | Satu chapter baru dapat ditambahkan dengan mengubah paling banyak 2 berkas: berkas Markdown dan (bila bab belum terdaftar) entri pada blok data dashboard; `git diff` PR tidak mengubah logika dashboard di luar blok data dan tidak mengubah `mkdocs.yml`. | INT-05, FR-064 |
 | AC-27 | Setiap perintah pada chapter `published` memiliki catatan uji (VM, rilis, tanggal) di bagian log pengujian atau di PR; pemeriksa menyetujui sebelum penggabungan. | NFR-015 |
 | AC-28 | Tidak ada kredensial, kunci, token, atau IP produksi pada repositori (pemindai rahasia 0 temuan). Contoh jaringan hanya memakai `example.com`/`192.0.2.0/24`/`2001:db8::/32`. | NFR-016, SEC-01 |
 
@@ -433,16 +435,18 @@ Setiap kriteria dapat diverifikasi lulus/gagal. "Diuji pada" menyebut lingkungan
 | AC-32 | Mengubah `site_url` lewat variabel lingkungan menghasilkan `canonical` dan sitemap yang sesuai tanpa mengubah berkas yang dikomit. | URL-02, URL-07 |
 | AC-33 | Membuka `<base>/` mengembalikan dashboard (bukan 404). Membuka URL tidak ada mengembalikan halaman 404 kustom dengan tautan ke Beranda. | URL-06, URL-09 |
 | AC-34 | Status yang diubah di halaman materi terlihat di dashboard setelah menavigasi atau memuat ulang; sebaliknya juga berlaku; kunci `kurikulum-mail-ubuntu-v1` adalah satu-satunya kunci progres di `localStorage`. | INT-02, PRG-03, PRG-08 |
-| AC-35 | Berkas ekspor dari rilis saat ini (versi 1) dapat diimpor pada rilis sesudahnya; ada uji otomatis yang menyimpan fixture berkas ekspor v1. | PRG-02 |
+| AC-35 | Berkas ekspor dari rilis saat ini (versi 1) dapat diimpor pada rilis sesudahnya, oleh dashboard maupun `progress.js`; ada uji otomatis yang menyimpan fixture berkas ekspor v1 dan menjalankannya pada kedua implementasi. | PRG-02, PRG-03 |
 | AC-36 | Pipeline CI: PR dengan build gagal tidak dapat digabung; deploy tidak berjalan; situs yang aktif tidak berubah. | DEP-04, DEP-05 |
 | AC-37 | Dari pipeline hijau di `main` ke situs terbit ≤ 10 menit; revert komit memulihkan situs sebelumnya ≤ 15 menit. | DEP-03, DEP-07 |
 | AC-38 | Menjalankan build Vercel dengan `vercel.json` menghasilkan situs setara (pemeriksa tautan 0 rusak) tanpa perubahan pada konten. | DEP-06, NFR-014 |
 | AC-39 | Permintaan jaringan saat memuat dashboard dan satu halaman materi hanya ke origin yang sama (diperiksa lewat HAR/Playwright): 0 permintaan ke domain eksternal. | NFR-008, NFR-009 |
 | AC-40 | Workflow GitHub Actions menyatakan `permissions:` eksplisit dan menyematkan versi semua action; pemindai konfigurasi 0 temuan tingkat tinggi. | SEC-04 |
+| AC-41 | Dua build berurutan dari pohon sumber dan variabel lingkungan yang sama menghasilkan manifes SHA-256 keluaran identik (kecuali berkas yang tercatat sebagai pengecualian). | FR-066 |
+| AC-42 | `sha256(site/index.html)` sama dengan `sha256(kurikulum-mail-server-ubuntu.html)`; manifes sumber sebelum dan sesudah build identik; `git status --porcelain` kosong setelah build. | URL-09, FR-065 |
 
 ### 11.4 Definisi selesai untuk rilis awal (MVP)
 
-Rilis awal dianggap selesai bila: AC-01 sampai AC-13 lulus (kecuali AC-04 bagian isi materi), AC-20 sampai AC-26, AC-30 sampai AC-36 dan AC-39 lulus, dan minimal **satu** chapter (mis. CH-01-01-01) berstatus `published` dengan catatan uji VM.
+Rilis awal dianggap selesai bila: AC-01 sampai AC-13 lulus (kecuali AC-04 bagian isi materi), AC-20 sampai AC-26, AC-30 sampai AC-36, AC-39, AC-41, dan AC-42 lulus, dan minimal **satu** chapter (mis. CH-01-01-01) berstatus `published` dengan catatan uji VM.
 
 ---
 
@@ -489,7 +493,7 @@ P = probabilitas, D = dampak (R rendah, S sedang, T tinggi).
 | ID | Pertanyaan | Dampak jika belum dijawab |
 |---|---|---|
 | Q-01 | Apakah repositori publik atau privat? GitHub Pages pada repositori privat memerlukan paket tertentu. | Menentukan DEP-02 dan strategi preview |
-| Q-02 | Apakah dashboard harus tetap bisa dibuka lewat `file://` (tanpa server)? Ini memengaruhi apakah data boleh dimuat lewat `fetch` (INT-07). | Bentuk pemuatan data |
+| Q-02 | Apakah dashboard yang dibuka lewat `file://` (tanpa server) dapat diterima tanpa tautan "Buka materi"? Data kurikulum tertanam sehingga dashboard tetap berfungsi; hanya `chapters.json` tidak dapat dimuat lewat `fetch` di `file://`. | Ketersediaan tautan materi saat pratinjau lokal |
 | Q-03 | Apakah tata letak yang diusulkan (dashboard di `/`, MkDocs di `/materi/`) disetujui, atau MkDocs sebagai situs utama dengan dashboard sebagai halaman di dalamnya? | Bagian 7 dan 8 |
 | Q-04 | Apakah rilis acuan tetap Ubuntu 24.04 LTS, dan versi Postfix/Dovecot/Rspamd/Roundcube apa yang dikunci? | Isi semua chapter praktik |
 | Q-05 | Apakah chapter opsional dihitung dalam progres 100%? (default PRD: tidak, FR-022) | Definisi progres |
@@ -516,9 +520,9 @@ Pekerjaan yang sudah selesai sebelum M0: audit (`docs/project-audit.md`), PRD (`
 |---|---|---|---|---|
 | M0 | Fondasi repositori | Git, GitHub, README, lisensi, baseline | S | Q-01, Q-09 |
 | M1 | Stabilisasi dashboard | Perbaikan F-01…F-11 terbukti di browser, uji otomatis dasar | M | M0 |
-| M2 | Sumber data tunggal | `curriculum.json`, schema, validator, dashboard memakai data | M | M1 |
-| M3 | Struktur berkas dan modul progres | `index.html`, JS/CSS terpisah, modul progres bersama | M | M2 |
-| M4 | Kerangka MkDocs | `mkdocs.yml`, generator stub dan `nav`, template 14 bagian | M | M2, Q-03 |
+| M2 | Ekstraktor dan validator data | Ekstraksi hanya-baca blok data dashboard, `.build/curriculum.json` berobjek bernama, JSON Schema, validator graf | M | M1 |
+| M3 | Kontrak progres dan skrip materi | `materi/assets/progress.js`, fixture v1, uji kontrak lintas implementasi (dashboard tetap satu berkas) | M | M2 |
+| M4 | Kerangka MkDocs | `mkdocs.yml`, perintah `scaffold`, generator `nav` (keluaran di `.build/`), template 14 bagian | M | M2, Q-03 |
 | M5 | Integrasi dan CI/CD ke GitHub Pages | Pipeline, deploy, URL dan base path teruji | M | M3, M4 |
 | M6 | Chapter pilot | Satu chapter terbit dari ujung ke ujung | M | M5, Q-04, Q-13 |
 | M7 | Rilis publik v1.0 | Hardening, SEO, aksesibilitas, dokumentasi kontribusi | M | M6 |
@@ -537,19 +541,19 @@ Pekerjaan yang sudah selesai sebelum M0: audit (`docs/project-audit.md`), PRD (`
 - Kebutuhan: FR-004, FR-005, FR-006, FR-026, FR-030, FR-031, NFR-011, NFR-019, PRG-02, PRG-06.
 - Gerbang keluar: AC-01, AC-02, AC-03, AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 lulus.
 
-**M2. Sumber data tunggal**
-- Cakupan: ekstrak `CATS`, `CAPSTONE`, `SCHED`, `REFS` ke `data/curriculum.json` dengan objek bernama; JSON Schema; skrip validasi (ID unik, prasyarat valid, tanpa siklus); dashboard membaca data (inline hasil build atau `fetch`, sesuai Q-02); hapus ID kategori yang di-hardcode untuk jadwal dan capstone.
-- Kebutuhan: FR-050, FR-051, FR-060, INT-07.
-- Gerbang keluar: AC-20 lulus; dashboard menampilkan 16 kategori, 36 modul, 136 chapter yang identik dengan sebelum ekstraksi (perbandingan otomatis atas ID, judul, menit, prasyarat).
+**M2. Ekstraktor dan validator data**
+- Cakupan: alat ekstraksi hanya-baca atas blok `/*DATA-START*/…/*DATA-END*/` pada dashboard (tanpa mengubah dashboard); normalisasi menjadi objek bernama di `.build/curriculum.json`; JSON Schema; skrip validasi (ID unik, prasyarat valid, tanpa siklus); uji fixture untuk penanda hilang/ganda. Catatan: ID kategori yang di-hardcode untuk jadwal dan capstone pada dashboard dicatat sebagai utang teknis, bukan pekerjaan milestone ini.
+- Kebutuhan: FR-050, FR-051, FR-060.
+- Gerbang keluar: AC-20 lulus; artefak memuat 16 kategori, 36 modul, 136 chapter yang cocok dengan hitungan dashboard (perbandingan otomatis atas ID, judul, menit, prasyarat); berkas dashboard tidak berubah (hash sama).
 
-**M3. Struktur berkas dan modul progres**
-- Cakupan: pecah menjadi `index.html`, `assets/app.js`, `assets/style.css`; pindahkan kode progres ke satu modul bersama (muat, sanitasi, simpan, `storage` sync, ekspor/impor); kait CSP-friendly (tanpa skrip inline selain yang tidak terhindarkan).
-- Kebutuhan: URL-09, PRG-01, PRG-03, JS-06, NFR-009.
-- Gerbang keluar: AC-33 (bagian `index.html`), AC-35 lulus; AC-01…AC-10 tetap lulus (tanpa regresi); AC-13 terukur.
+**M3. Kontrak progres dan skrip materi**
+- Cakupan: dokumentasikan kontrak progres v1 (kunci, skema, ekspor); tulis `materi/assets/progress.js` untuk halaman materi; uji kontrak yang menjalankan fixture yang sama pada dashboard dan `progress.js`. Dashboard tetap satu berkas dan tidak dipecah.
+- Kebutuhan: PRG-01, PRG-02, PRG-03, INT-02, INT-03, NFR-009.
+- Gerbang keluar: AC-35 dan uji kontrak lulus pada kedua implementasi; AC-01…AC-10 tetap lulus (tanpa regresi); AC-13 terukur.
 
 **M4. Kerangka MkDocs**
-- Cakupan: `mkdocs.yml` (`docs_dir: materi`), `requirements.txt` terkunci, template chapter 14 bagian, generator stub dan `nav`, banner `draft` (atau pengecualian build), panduan penulisan chapter untuk Claude Code, skrip validasi front matter dan heading, pemindai rahasia sederhana. Keputusan versi mengikuti verifikasi A-05.
-- Kebutuhan: FR-040…FR-045, FR-052, FR-053, FR-060…FR-063, NFR-012.
+- Cakupan: `mkdocs.yml` (`docs_dir: materi`), `requirements.txt` terkunci, template chapter 14 bagian, perintah `scaffold` (manual), generator `nav` dan `exclude_docs` ke `.build/mkdocs.generated.yml`, banner `draft` (atau pengecualian build), panduan penulisan chapter untuk Claude Code, skrip validasi front matter dan heading, pemindai rahasia sederhana. Keputusan versi mengikuti verifikasi A-05.
+- Kebutuhan: FR-040…FR-045, FR-052, FR-053, FR-060…FR-063, FR-065, NFR-012.
 - Gerbang keluar: AC-21, AC-22, AC-23, AC-24 lulus; `mkdocs build --strict` sukses dengan seluruh chapter `draft`.
 
 **M5. Integrasi dan CI/CD ke GitHub Pages**
@@ -594,7 +598,7 @@ M3 dan M4 dapat dikerjakan paralel setelah M2 selesai (keduanya hanya bergantung
 | Sebelum | Pertanyaan yang harus terjawab |
 |---|---|
 | M0 | Q-01 (publik/privat), Q-09 (lisensi) |
-| M2 | Q-02 (`file://` atau tidak), Q-05 (progres opsional), Q-07 (nasib ID yang dihapus) |
+| M2 | Q-05 (progres opsional), Q-07 (nasib ID yang dihapus) |
 | M4 | Q-03 (tata letak situs), A-05 (status MkDocs Material) |
 | M5 | Q-12 (domain kustom) |
 | M6 | Q-04 (rilis acuan dan versi paket), Q-06 (peninjau dan bukti uji), Q-13 (chapter pertama) |
@@ -635,9 +639,9 @@ M3 dan M4 dapat dikerjakan paralel setelah M2 selesai (keduanya hanya bergantung
 ## Lampiran B. Urutan Implementasi yang Disarankan
 
 1. `git init`, `README.md`, komit baseline, remote GitHub. (RK-01)
-2. Ekstrak `curriculum.json` + JSON Schema + skrip validasi. (FR-050/051/060)
-3. Pecah dashboard menjadi `index.html`, JS, CSS, dan modul progres bersama. (PRG-03, JS-06)
-4. Siapkan MkDocs, generator stub dan `nav`, dan tautan "Buka materi". (FR-040…054)
+2. Bangun ekstraktor hanya-baca atas blok data dashboard, JSON Schema, dan skrip validasi. (FR-050/051/060)
+3. Dokumentasikan kontrak progres v1 dan tulis `progress.js` untuk halaman materi dengan uji kontrak lintas implementasi. (PRG-03, INT-02/03)
+4. Siapkan MkDocs, perintah `scaffold`, generator `nav`, dan tautan "Buka materi". (FR-040…054)
 5. CI GitHub Actions (validasi, build, uji, deploy ke Pages). (DEP-02…05)
 6. Uji otomatis dashboard (AC-01…AC-10) dan pemeriksa tautan (AC-30/31).
 7. Tulis dan terbitkan chapter pertama sebagai uji alur penuh (bagian 11.4).
@@ -697,10 +701,10 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 | FR-045 | BARU | OTO | Situs materi memiliki indeks pencarian, kontrol tema, tabel isi; pencarian "dkim" mengembalikan hasil |
 | FR-046 | BARU | OTO | AC-34 |
 | FR-047 | BARU | OTO | Tautan sebelumnya/berikutnya tiap halaman cocok dengan urutan `curriculum.json` |
-| FR-050 | BARU | OTO | AC-20; tidak ada definisi struktur lain (pemindai: judul chapter hanya di `curriculum.json`) |
-| FR-051 | BARU | OTO | Validasi JSON Schema lulus; data posisional tidak ada |
-| FR-052 | BARU | OTO | AC-21 |
-| FR-053 | BARU | OTO | AC-21 |
+| FR-050 | BARU | OTO | AC-20; tidak ada definisi struktur lain (pemindai: judul chapter hanya di blok data dashboard); `.build/curriculum.json` tidak dikomit |
+| FR-051 | BARU | OTO | Artefak lolos JSON Schema; tidak ada data posisional pada artefak; ekstraksi gagal bila penanda hilang atau ganda (uji fixture) |
+| FR-052 | BARU | OTO | `scaffold` pada bab baru membuat stub dengan 14 heading; pada bab yang sudah ada menolak menimpa (kode keluar ≠ 0, isi berkas tidak berubah) |
+| FR-053 | BARU | OTO | AC-21; `mkdocs.yml` tidak berubah setelah build; `nav` hasil generasi cocok dengan urutan artefak |
 | FR-054 | BARU | OTO | AC-25 |
 | FR-055 | BARU | OTO | Dengan `materi/` dihapus dari `site/` (uji), semua fitur dashboard di AC-01…AC-10 tetap lulus |
 | FR-060 | BARU | OTO | AC-20, AC-22 |
@@ -708,6 +712,8 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 | FR-062 | BARU | OTO | AC-24 |
 | FR-063 | BARU | INS | Berkas panduan penulisan ada, memuat template, aturan uji VM, dan gaya; ditinjau pemilik |
 | FR-064 | BARU | REV | AC-26; PR menyentuh satu chapter |
+| FR-065 | BARU | OTO | AC-42 (manifes sumber identik, `git status` bersih) |
+| FR-066 | BARU | OTO | AC-41 |
 
 ### C.3 Non-functional requirements
 
@@ -740,11 +746,11 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 |---|---|---|---|
 | INT-01 | BARU | OTO | AC-25; semua tautan materi cocok dengan pola `…/materi/chapter/<CH-ID>/` |
 | INT-02 | BARU | OTO | AC-34 |
-| INT-03 | BARU | INS | Hanya satu berkas sumber modul progres di repositori; tidak ada duplikat (pemindai kesamaan atau `grep` kunci `kurikulum-mail-ubuntu-v1` muncul di satu modul) |
+| INT-03 | BARU | OTO | Hanya satu `progress.js` di `materi/assets/`; uji kontrak lulus pada dashboard dan `progress.js` dengan fixture yang sama |
 | INT-04 | BARU | OTO | Tautan dashboard dari materi mengarah ke hash yang ada di data (`#CH-…`, `#CAT-…`, `#/`) |
 | INT-05 | BARU | REV | AC-26 |
 | INT-06 | BARU | OTO | Dengan materi 404 (diblokir), `localStorage` progres tidak berubah |
-| INT-07 | BARU | OTO | Dengan `fetch` data diblokir, dashboard memakai cadangan tertanam; kedua jalur menghasilkan 136 chapter |
+| INT-07 | BARU | OTO | `chapters.json` memuat tepat bab yang halamannya ada di `site/`; bila berkas 404 atau rusak, dashboard tetap berfungsi tanpa tautan materi |
 | INT-08 | BARU | OTO | Indeks pencarian memuat 0 entri `draft` dan 1 entri tiap chapter `published` |
 | URL-01 | SEBAGIAN | OTO | Ada: dashboard tanpa aset. Lulus bila AC-30 |
 | URL-02 | BARU | OTO | AC-32 |
@@ -754,11 +760,11 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 | URL-06 | BARU | OTO | AC-33 |
 | URL-07 | BARU | OTO | Tiap halaman materi memuat `<link rel="canonical">` dengan awalan `site_url` |
 | URL-08 | BARU | INS | `.nojekyll` ada di artefak `site/` |
-| URL-09 | BARU | OTO | AC-33 |
+| URL-09 | BARU | OTO | AC-33; AC-42 (hash `site/index.html` = hash sumber) |
 | URL-10 | BARU | OTO | AC-30 |
 | PRG-01 | ADA | OTO | Fixture v1 diimpor dan hasil simpan memuat `"v":1`; migrasi dari versi lebih lama diuji bila versi baru dibuat |
 | PRG-02 | ADA | OTO | AC-35 |
-| PRG-03 | BARU | INS | INT-03 |
+| PRG-03 | BARU | OTO | Fixture v1: muat → ubah → simpan menghasilkan JSON setara pada dashboard dan `progress.js`; impor ekspor v1 diterima oleh keduanya |
 | PRG-04 | SEBAGIAN | OTO | Ada: ID tak dikenal diabaikan saat muat. Kurang: dipertahankan di penyimpanan (bergantung Q-07). Lulus bila perilaku yang diputuskan tertulis dan diuji |
 | PRG-05 | ADA\* | OTO | AC-05 |
 | PRG-06 | SEBAGIAN | OTO | Ada: tangkap error. Kurang: pemberitahuan pengguna. Lulus bila AC-08 dan toast muncul saat `setItem` melempar |
@@ -769,7 +775,7 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 | JS-03 | ADA | INS | Dashboard berjalan dari berkas statis tanpa tahap kompilasi (AC-30 dengan server berkas biasa) |
 | JS-04 | BARU | OTO | Halaman materi: skrip progres berfungsi dengan dan tanpa navigasi instan (AC-34 diulang pada dua konfigurasi) |
 | JS-05 | SEBAGIAN | OTO | Ada: `<noscript>` di dashboard. Lulus bila halaman materi memuat konten dengan JavaScript dimatikan (uji Playwright `javaScriptEnabled:false`) |
-| JS-06 | BARU | OTO | Kebijakan CSP ketat tanpa `unsafe-inline` dipasang pada uji; AC-01…AC-10 tetap lulus |
+| JS-06 | BARU | OTO | Respons (Vercel atau server uji) membawa CSP berhash; hash cocok dengan blok `<script>` inline pada `site/index.html`; AC-01…AC-10 lulus di bawah CSP itu |
 | JS-07 | ADA | INS | Komentar peringatan pada `CONTENT` ada; PR kontribusi luar memerlukan tinjauan (aturan cabang terlindungi) |
 
 ### C.5 Deployment, keamanan, pemeliharaan
@@ -816,7 +822,7 @@ Setiap baris memiliki kriteria lulus/gagal yang konkret, merujuk AC bila ada. Pe
 | ADA | 23 |
 | ADA\* (diubah setelah audit, belum diuji di browser) | 10 |
 | SEBAGIAN | 13 |
-| BARU | 78 |
-| **Total** | **124** |
+| BARU | 80 |
+| **Total** | **126** |
 
 Pernyataan "ADA" berarti kode implementasi terlihat pada pembacaan, bukan bahwa ia sudah teruji. Seluruh persyaratan berstatus ADA dan ADA\* menjadi bahan **M1 (Stabilisasi dashboard)** pada bagian 13: tujuan M1 adalah mengubah status itu menjadi "teruji" lewat uji otomatis di atas, tanpa mengubah implementasi kecuali uji menemukan cacat.

@@ -151,6 +151,7 @@ document.documentElement.setAttribute("data-theme",t);})();
     <span class="pct" id="hPct">0%</span>
     <div class="pbar" id="hBar" role="progressbar" aria-label="Progres kurikulum (chapter wajib)" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
     <a class="btn" href="#/tentang">Panduan</a>
+    <a class="btn" href="materi/">Materi</a>
     <button class="btn" id="themeBtn" type="button" aria-pressed="false">Mode gelap</button>
   </div>
 </header>
@@ -660,13 +661,20 @@ function refsList(keys,extra){
 }
 
 /* ===== Tampilan: Chapter ===== */
+/* Daftar bab terbit dari materi/chapters.json (opsional; gagal-aman). */
+let PUB={},LVL={};
+const PUBRE=/^chapter\/CH-\d{2}-\d{2}-\d{2}\/$/;
+function matUrl(id){const p=PUB[id]&&PUB[id].path;return typeof p==="string"&&PUBRE.test(p)?new URL("materi/"+p,document.baseURI).href:null;}
+const LVLRE=/^level\/L\d{1,2}\/$/;
+function lvlUrl(id){const p=LVL[id]&&LVL[id].path;return typeof p==="string"&&LVLRE.test(p)?new URL("materi/"+p,document.baseURI).href:null;}
 function renderChapter(ch){
   const s=st(ch.id),c=CONTENT[ch.id],pend=!c,idx=CHS.indexOf(ch),next=CHS[idx+1],prev=CHS[idx-1];
   const crumbs='<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Beranda</a></li><li><a href="#'+ch.cat.id+'">'+ch.cat.id+" · "+esc(ch.cat.name)+"</a></li><li>"+ch.mod.id+" · "+esc(ch.mod.title)+'</li><li aria-current="page">'+ch.id+"</li></ol></nav>";
   const sel='<label>Status belajar: <select data-status="'+ch.id+'">'+STATUS.map((x,i)=>'<option value="'+i+'"'+(i===s?" selected":"")+">"+x+"</option>").join("")+"</select></label>";
   const titles=["Ringkasan","Tujuan Pembelajaran","Prasyarat","Materi Teori","Praktik dan Implementasi","Perintah Linux","Konfigurasi","Verifikasi","Troubleshooting","Security Review","Latihan","Assessment","Checklist Kelulusan","Referensi Resmi"];
   const toc='<div class="toc noprint" aria-label="Lompat ke bagian">'+titles.map((t,i)=>'<a href="#s'+(i+1)+'" data-jump>'+(i+1)+". "+t+"</a>").join("")+"</div>";
-  const banner=pend?'<div class="warnbox" role="note"><strong>Belum diimplementasikan.</strong> Detail lesson, perintah, dan konfigurasi chapter ini belum ditulis. Bagian di bawah memuat <em>spesifikasi dan rencana cakupan</em>, bukan materi final. Materi akan ditambahkan secara bertahap dengan ID chapter yang sama.</div>':'<div class="infobox">Chapter ini sudah diimplementasikan.</div>';
+  const mu=matUrl(ch.id);
+  const banner=mu?'<div class="infobox"><strong>Materi lengkap tersedia.</strong> <a class="btn pri" href="'+esc(mu)+'">Buka materi</a><br><small>Bagian di bawah adalah spesifikasi dan rencana cakupan dari dashboard.</small></div>':pend?'<div class="warnbox" role="note"><strong>Belum diimplementasikan.</strong> Detail lesson, perintah, dan konfigurasi chapter ini belum ditulis. Bagian di bawah memuat <em>spesifikasi dan rencana cakupan</em>, bukan materi final. Materi akan ditambahkan secara bertahap dengan ID chapter yang sama.</div>':'<div class="infobox">Chapter ini sudah diimplementasikan.</div>';
   const ready=ch.pre.every(p=>st(p)===4);
   let h=crumbs+'<h2 class="pt">'+esc(ch.title)+"</h2>"+badge(s)+'<span class="badge">'+(ch.impl?"Implementasi praktik":"Konseptual")+'</span><span class="badge">'+ENV[ch.mod.env]+"</span>"+(ch.mod.opt?'<span class="badge">Opsional</span>':"")+(ready||!ch.pre.length?'<span class="badge s4">Prasyarat terpenuhi</span>':'<span class="badge s3">Prasyarat belum lengkap</span>')+banner+toc;
   /* 1 */
@@ -721,9 +729,11 @@ function prepItems(ch){
 function renderCat(cat){
   const cs=catStats(cat);
   let h='<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Beranda</a></li><li aria-current="page">'+cat.id+"</li></ol></nav><h2 class='pt'>"+cat.id+" · "+esc(cat.name)+'</h2><span class="badge">Level '+cat.lv+'</span><span class="badge">'+ENV[cat.env]+"</span>"+(cat.opt?'<span class="badge">Opsional (spesialisasi)</span>':"")+'<span class="badge">'+cat.mods.length+" modul · "+cat.chs.length+" chapter · "+fmt(cat.min)+'</span><span class="badge">'+cs.d+"/"+cs.t+" selesai</span>";
+  const lu=lvlUrl(cat.id);
+  if(lu)h+='<div class="infobox"><strong>Materi level tersedia.</strong> <a class="btn pri" href="'+esc(lu)+'">Buka materi level</a></div>';
   h+=sec("A","Tujuan Pembelajaran",ul(cat.obj.map(esc)));
   h+=sec("B","Prasyarat",cat.preCats.length?ul(cat.preCats.map(p=>'<a href="#'+p.id+'">'+p.id+" · "+esc(p.name)+"</a>")):"<p>Tidak ada; titik awal.</p>");
-  h+=sec("C","Modul dan Chapter",cat.mods.map(m=>"<h3>"+m.id+" · "+esc(m.title)+(m.opt?" (opsional)":"")+'</h3><ul class="cl">'+m.chs.map(c=>'<li><a href="#'+c.id+'">'+c.id+" · "+esc(c.title)+"</a> "+badge(st(c.id))+" <small>"+fmt(c.min)+"</small></li>").join("")+"</ul>").join(""));
+  h+=sec("C","Modul dan Chapter",cat.mods.map(m=>"<h3>"+m.id+" · "+esc(m.title)+(m.opt?" (opsional)":"")+'</h3><ul class="cl">'+m.chs.map(c=>'<li><a href="#'+c.id+'">'+c.id+" · "+esc(c.title)+"</a> "+badge(st(c.id))+" <small>"+fmt(c.min)+"</small>"+(matUrl(c.id)?' <a href="'+esc(matUrl(c.id))+'">Buka materi</a>':"")+"</li>").join("")+"</ul>").join(""));
   h+=sec("D","Deliverable Praktis",'<p>'+esc(cat.dl)+"</p>");
   h+=sec("E","Kriteria Penyelesaian","<p>"+esc(cat.crit)+"</p>");
   h+=sec("F","Catatan Keamanan","<p>"+esc(cat.sec)+"</p>");
@@ -857,6 +867,9 @@ $("#rstBtn").addEventListener("click",()=>{
 function setHH(){const h=document.getElementById("top").offsetHeight;document.documentElement.style.setProperty("--hh",h+"px");}
 window.addEventListener("resize",setHH);
 loadState();setHH();route(false);
+fetch("materi/chapters.json").then(r=>r.ok?r.json():null).then(d=>{
+  if(d&&d.schema===1&&d.chapters&&typeof d.chapters==="object"){PUB=d.chapters;if(d.levels&&typeof d.levels==="object")LVL=d.levels;const y=window.scrollY;route(false);window.scrollTo(0,y);}
+}).catch(()=>{});
 </script>
 </body>
 </html>
