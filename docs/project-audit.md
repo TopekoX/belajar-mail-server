@@ -291,3 +291,9 @@ Opsi B mempertahankan nilai portal (progres, prasyarat, filter) sambil memindahk
 8. Apakah diperlukan **sinkronisasi progres antar perangkat** (butuh backend atau gist), atau ekspor/impor manual sudah cukup?
 9. Apakah pencarian harus mencakup **isi materi** dan bahasa selain Indonesia?
 10. Apakah tema/stack MkDocs yang diinginkan sudah ditentukan (Material atau tema lain)?
+
+---
+
+## 11. Pembaruan Implementasi MkDocs (2026-10-13)
+
+Kerangka MkDocs dibangun ulang (`mkdocs.yml`, `requirements.txt`, `materi/index.md`) dan tautan "Materi" ditambahkan ke header dashboard. Validasi yang benar-benar dijalankan: `mkdocs build` (strict) tanpa peringatan; build dua kali menghasilkan keluaran identik kecuali `sitemap.xml.gz`; `site/index.html` byte-identik dengan sumber; `git status` hanya menampilkan perubahan yang disengaja; pemeriksa tautan/aset relatif dan indeks pencarian lulus saat situs dilayani di `/` dan di subpath `/belajar-mail-server/`; halaman contoh (di luar proyek) merender admonition, tabel, blok kode berjudul, task list, canonical dari `SITE_URL`, dan ditemukan pencarian. **Belum diuji:** perilaku dashboard dan tombol salin kode di browser sungguhan (tidak ada browser otomatis), serta perbaikan F-01…F-11. Temuan D-01 (nama `index.html`) teratasi pada keluaran build (`site/index.html`).
