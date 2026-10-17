@@ -41,7 +41,7 @@ for md in sorted(SOURCE.glob("*.md")):
         continue
     if not (OUTPUT_DIR / "chapter" / chapter_id / "index.html").is_file():
         raise FileNotFoundError(f"Halaman hasil build tidak ada untuk {chapter_id}")
-    chapters[chapter_id] = {"path": f"chapter/{chapter_id}/", "title": meta["title"]}
+    chapters[chapter_id] = {"path": f"chapter/{chapter_id}/", "title": meta["title"].strip('"')}
 
 levels = {}
 for md in sorted(LEVEL_SOURCE.glob("*.md")):

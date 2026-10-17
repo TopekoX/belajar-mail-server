@@ -8,11 +8,31 @@ site_dir: site/materi
 use_directory_urls: true
 strict: true
 
+hooks:
+  - hooks/dashboard_links.py
+
 theme:
   name: material
   language: id
+  custom_dir: overrides
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Mode otomatis (ikuti sistem), ganti ke mode terang
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Mode terang, ganti ke mode gelap
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Mode gelap, ganti ke mode otomatis
   features:
     - navigation.sections
+    - navigation.footer
     - navigation.top
     - toc.follow
     - search.suggest
@@ -68,5 +88,182 @@ nav:
       - "SSH":
           - "CH-02-04-01 · Administrasi Server dengan SSH": chapter/CH-02-04-01.md
   - "L2 · Fundamental Arsitektur Email":
+      - "Ringkasan Level 2": level/L2.md
       - "Model dan Protokol Email":
           - "CH-03-01-01 · Siklus Hidup Email dan Peran MUA, MSA, MTA, MDA": chapter/CH-03-01-01.md
+          - "CH-03-01-02 · Protokol SMTP, ESMTP, IMAP, dan POP3": chapter/CH-03-01-02.md
+          - "CH-03-01-03 · Envelope vs Header, MIME, dan Lampiran": chapter/CH-03-01-03.md
+      - "Routing dan Pengiriman":
+          - "CH-03-02-01 · Lookup MX dan Routing SMTP": chapter/CH-03-02-01.md
+          - "CH-03-02-02 · Antrian, Deferred, Retry, Bounce, dan DSN": chapter/CH-03-02-02.md
+          - "CH-03-02-03 · Format Mailbox, Message-ID, dan Log Email": chapter/CH-03-02-03.md
+          - "CH-03-02-04 · Mengirim, Menerima, Relay, dan Mengambil Email": chapter/CH-03-02-04.md
+  - "L3 · Persiapan Ubuntu Server":
+      - "Ringkasan Level 3": level/L3.md
+      - "Perencanaan dan Instalasi":
+          - "CH-04-01-01 · Perencanaan Hardware, VM, dan Sizing": chapter/CH-04-01-01.md
+          - "CH-04-01-02 · Instalasi Ubuntu Server LTS dan Pembaruan": chapter/CH-04-01-02.md
+      - "Konfigurasi Dasar":
+          - "CH-04-02-01 · IP Statis dan Validasi Jaringan (Netplan)": chapter/CH-04-02-01.md
+          - "CH-04-02-02 · Hostname, FQDN, Timezone, dan Sinkronisasi Waktu": chapter/CH-04-02-02.md
+          - "CH-04-02-03 · Perencanaan Storage dan Izin Filesystem": chapter/CH-04-02-03.md
+      - "Baseline Keamanan Awal":
+          - "CH-04-03-01 · SSH Aman dan Firewall Awal": chapter/CH-04-03-01.md
+          - "CH-04-03-02 · Hardening Awal dan Pembaruan Otomatis": chapter/CH-04-03-02.md
+          - "CH-04-03-03 · Pemeriksaan Kesehatan Baseline": chapter/CH-04-03-03.md
+  - "L4 · Domain dan Infrastruktur DNS":
+      - "Ringkasan Level 4": level/L4.md
+      - "Fondasi DNS untuk Email":
+          - "CH-05-01-01 · Registrasi Domain dan Hosting DNS": chapter/CH-05-01-01.md
+          - "CH-05-01-02 · Record A, AAAA, dan MX": chapter/CH-05-01-02.md
+          - "CH-05-01-03 · PTR, Reverse DNS, dan FCrDNS": chapter/CH-05-01-03.md
+          - "CH-05-01-04 · TTL, Propagasi, dan Cache DNS": chapter/CH-05-01-04.md
+      - "DNS Autentikasi dan Troubleshooting":
+          - "CH-05-02-01 · Record Autentikasi: SPF, DKIM, DMARC (Publikasi DNS)": chapter/CH-05-02-01.md
+          - "CH-05-02-02 · DNSSEC dan Split-Horizon DNS": chapter/CH-05-02-02.md
+          - "CH-05-02-03 · Kesalahan Umum dan Troubleshooting DNS": chapter/CH-05-02-03.md
+  - "L5 · Instalasi Inti Mail Server (Postfix dan Dovecot)":
+      - "Ringkasan Level 5": level/L5.md
+      - "Postfix":
+          - "CH-06-01-01 · Arsitektur Postfix dan Instalasi": chapter/CH-06-01-01.md
+          - "CH-06-01-02 · main.cf, master.cf, dan Identitas Server": chapter/CH-06-01-02.md
+          - "CH-06-01-03 · Antarmuka, Jaringan Tepercaya, dan Delivery Lokal": chapter/CH-06-01-03.md
+          - "CH-06-01-04 · Pembatasan Relay dan Pencegahan Open Relay": chapter/CH-06-01-04.md
+          - "CH-06-01-05 · Alias, Address Rewriting, dan Transport Maps": chapter/CH-06-01-05.md
+          - "CH-06-01-06 · Manajemen Antrian dan Analisis Log": chapter/CH-06-01-06.md
+      - "Dovecot":
+          - "CH-06-02-01 · Arsitektur Dovecot, Maildir, dan Izin": chapter/CH-06-02-01.md
+          - "CH-06-02-02 · Konfigurasi IMAP dan POP3": chapter/CH-06-02-02.md
+          - "CH-06-02-03 · Autentikasi: Sistem vs Virtual User dan SASL dengan Postfix": chapter/CH-06-02-03.md
+          - "CH-06-02-04 · Integrasi LMTP Postfix dan Dovecot": chapter/CH-06-02-04.md
+  - "L6 · Mailbox dan Konfigurasi Klien Email":
+      - "Ringkasan Level 6": level/L6.md
+      - "Provisioning Mailbox":
+          - "CH-07-01-01 · Virtual Domain dan Virtual Mailbox": chapter/CH-07-01-01.md
+          - "CH-07-01-02 · Akun Sistem vs Virtual User: Trade-off": chapter/CH-07-01-02.md
+          - "CH-07-01-03 · Siklus Hidup Akun: Buat, Suspend, Hapus, Ganti Password": chapter/CH-07-01-03.md
+          - "CH-07-01-04 · Quota Mailbox": chapter/CH-07-01-04.md
+      - "Klien Email":
+          - "CH-07-02-01 · Konfigurasi Thunderbird dan Klien Desktop": chapter/CH-07-02-01.md
+          - "CH-07-02-02 · Konfigurasi Android dan iOS": chapter/CH-07-02-02.md
+          - "CH-07-02-03 · Troubleshooting Akses Mailbox dan Log Autentikasi": chapter/CH-07-02-03.md
+  - "L7 · TLS dan Autentikasi Email":
+      - "Ringkasan Level 7": level/L7.md
+      - "TLS dan Port Layanan":
+          - "CH-08-01-01 · Sertifikat TLS dan Trust Chain": chapter/CH-08-01-01.md
+          - "CH-08-01-02 · Let's Encrypt, Certbot, dan Perpanjangan Otomatis": chapter/CH-08-01-02.md
+          - "CH-08-01-03 · Submission 587/465 dan IMAPS 993": chapter/CH-08-01-03.md
+          - "CH-08-01-04 · Protokol TLS, Cipher, dan Monitoring Kedaluwarsa": chapter/CH-08-01-04.md
+      - "Autentikasi Email":
+          - "CH-08-02-01 · SPF: Sintaks dan Keterbatasan": chapter/CH-08-02-01.md
+          - "CH-08-02-02 · DKIM: Signing dan Rotasi Selector": chapter/CH-08-02-02.md
+          - "CH-08-02-03 · DMARC: Alignment dan Progres Kebijakan": chapter/CH-08-02-03.md
+          - "CH-08-02-04 · Authentication-Results dan Pengujian Aman": chapter/CH-08-02-04.md
+  - "L8 · Webmail dan Layanan Pendukung":
+      - "Ringkasan Level 8": level/L8.md
+      - "Roundcube (Opsional, Direkomendasikan)":
+          - "CH-09-01-01 · Web Server, PHP, dan Database untuk Webmail": chapter/CH-09-01-01.md
+          - "CH-09-01-02 · Instalasi Roundcube dan Integrasi IMAP/SMTP": chapter/CH-09-01-02.md
+          - "CH-09-01-03 · HTTPS, Keamanan Browser, dan Sesi Login": chapter/CH-09-01-03.md
+          - "CH-09-01-04 · Batas Lampiran, Backup, dan Upgrade Webmail": chapter/CH-09-01-04.md
+  - "L9 · Security Hardening dan Threat Defense":
+      - "Ringkasan Level 9": level/L9.md
+      - "Kontrol Pencegahan":
+          - "CH-10-01-01 · Kerangka Kontrol: Preventif, Detektif, Korektif": chapter/CH-10-01-01.md
+          - "CH-10-01-02 · Hardening SSH dan Eksposur Jaringan": chapter/CH-10-01-02.md
+          - "CH-10-01-03 · Least Privilege, Izin Service, dan Manajemen Secrets": chapter/CH-10-01-03.md
+          - "CH-10-01-04 · Pemaksaan TLS, Keamanan SMTP AUTH, dan Kebijakan Password": chapter/CH-10-01-04.md
+          - "CH-10-01-05 · Rate Limiting, Batas Koneksi, dan Fail2ban": chapter/CH-10-01-05.md
+      - "Spam, Malware, dan Phishing":
+          - "CH-10-02-01 · Rspamd: Arsitektur dan Instalasi": chapter/CH-10-02-01.md
+          - "CH-10-02-02 · Integrasi Rspamd dengan Postfix dan Tuning Kebijakan": chapter/CH-10-02-02.md
+          - "CH-10-02-03 · Pemindaian Malware dan Risiko Lampiran": chapter/CH-10-02-03.md
+          - "CH-10-02-04 · Pencegahan Phishing dan Spoofing; Strategi Enforcement DMARC": chapter/CH-10-02-04.md
+          - "CH-10-02-05 · Keamanan DNS untuk Mail": chapter/CH-10-02-05.md
+      - "Deteksi, Koreksi, dan Pemeliharaan":
+          - "CH-10-03-01 · Deteksi Penyalahgunaan dan Batas Pengiriman Keluar": chapter/CH-10-03-01.md
+          - "CH-10-03-02 · Integritas Log, Akses Log, dan Retensi": chapter/CH-10-03-02.md
+          - "CH-10-03-03 · Manajemen Patch dan Penilaian Kerentanan": chapter/CH-10-03-03.md
+          - "CH-10-03-04 · Enkripsi Backup, Penghapusan Aman, dan Retensi": chapter/CH-10-03-04.md
+  - "L10 · Monitoring, Otomasi, Backup, dan Disaster Recovery":
+      - "Ringkasan Level 10": level/L10.md
+      - "Monitoring dan Alerting":
+          - "CH-11-01-01 · Monitoring Sumber Daya, Disk, dan Inode": chapter/CH-11-01-01.md
+          - "CH-11-01-02 · Health Check Service, Antrian, dan Sertifikat": chapter/CH-11-01-02.md
+          - "CH-11-01-03 · Alerting, Metrik, dan Dashboard": chapter/CH-11-01-03.md
+      - "Otomasi":
+          - "CH-11-02-01 · Otomasi dengan Bash yang Aman": chapter/CH-11-02-01.md
+          - "CH-11-02-02 · Scheduled Jobs: systemd Timer dan Cron": chapter/CH-11-02-02.md
+          - "CH-11-02-03 · Log Rotation": chapter/CH-11-02-03.md
+      - "Backup dan Disaster Recovery":
+          - "CH-11-03-01 · Strategi dan Otomasi Backup": chapter/CH-11-03-01.md
+          - "CH-11-03-02 · Validasi Integritas dan Uji Restore": chapter/CH-11-03-02.md
+          - "CH-11-03-03 · RTO, RPO, dan Rencana Disaster Recovery": chapter/CH-11-03-03.md
+          - "CH-11-03-04 · Manajemen Konfigurasi dan Dokumentasi Infrastruktur": chapter/CH-11-03-04.md
+          - "CH-11-03-05 · Perencanaan Kapasitas dan Konsep High Availability": chapter/CH-11-03-05.md
+  - "L11 · Deployment Publik dan Kesiapan Produksi":
+      - "Ringkasan Level 11": level/L11.md
+      - "Persiapan Infrastruktur Publik":
+          - "CH-12-01-01 · Memilih VPS dan Memahami Pembatasan Port SMTP": chapter/CH-12-01-01.md
+          - "CH-12-01-02 · DNS Publik dan Koordinasi PTR": chapter/CH-12-01-02.md
+          - "CH-12-01-03 · Aturan Firewall dan Eksposur Layanan Publik": chapter/CH-12-01-03.md
+          - "CH-12-01-04 · Reverse Proxy dan Keamanan Webmail Publik": chapter/CH-12-01-04.md
+      - "Pengujian dan Go-Live":
+          - "CH-12-02-01 · Pengujian Konektivitas Masuk dan Keluar": chapter/CH-12-02-01.md
+          - "CH-12-02-02 · Reputasi Server dan Uji Pengiriman ke Penyedia Eksternal": chapter/CH-12-02-02.md
+          - "CH-12-02-03 · Analisis Header dan Diagnosis Folder Spam": chapter/CH-12-02-03.md
+          - "CH-12-02-04 · Kebijakan Abuse Penyedia, Checklist Go-Live, dan Rollback": chapter/CH-12-02-04.md
+  - "L12 · Operasi dan Administrasi Email":
+      - "Ringkasan Level 12": level/L12.md
+      - "Administrasi Domain dan Akun":
+          - "CH-13-01-01 · Menambah dan Menghapus Domain": chapter/CH-13-01-01.md
+          - "CH-13-01-02 · Membuat, Menonaktifkan, dan Menghapus Akun": chapter/CH-13-01-02.md
+          - "CH-13-01-03 · Reset Password, Pemulihan Akses, dan Pengguna Tidak Bisa Login": chapter/CH-13-01-03.md
+          - "CH-13-01-04 · Alias, Distribution Address, Forwarding, dan Shared Mailbox": chapter/CH-13-01-04.md
+          - "CH-13-01-05 · Quota, Konsumsi Storage, dan Kebijakan Retensi": chapter/CH-13-01-05.md
+      - "Antrian dan Pengiriman":
+          - "CH-13-02-01 · Inspeksi dan Manajemen Antrian yang Aman": chapter/CH-13-02-01.md
+          - "CH-13-02-02 · Memantau Deferred dan Bounce": chapter/CH-13-02-02.md
+          - "CH-13-02-03 · Melacak Message-ID dan Diagnosis Kegagalan Pengiriman": chapter/CH-13-02-03.md
+          - "CH-13-02-04 · Volume Keluar Abnormal dan Akun Terkompromi (Penanganan Awal)": chapter/CH-13-02-04.md
+      - "Operasi Rutin dan Tata Kelola":
+          - "CH-13-03-01 · Memantau Reputasi dan Hasil SPF, DKIM, DMARC": chapter/CH-13-03-01.md
+          - "CH-13-03-02 · Upgrade, Maintenance Window, dan Change Management": chapter/CH-13-03-02.md
+          - "CH-13-03-03 · Komunikasi Insiden dan Ketersediaan Layanan": chapter/CH-13-03-03.md
+          - "CH-13-03-04 · Kapasitas, Perluasan Storage, dan Offboarding Akun": chapter/CH-13-03-04.md
+          - "CH-13-03-05 · Checklist Operasional Harian, Mingguan, Bulanan, dan Kuartalan": chapter/CH-13-03-05.md
+          - "CH-13-03-06 · Runbook Operasional": chapter/CH-13-03-06.md
+  - "L13 · Troubleshooting dan Incident Response":
+      - "Ringkasan Level 13": level/L13.md
+      - "Troubleshooting":
+          - "CH-14-01-01 · Metodologi Troubleshooting Email": chapter/CH-14-01-01.md
+          - "CH-14-01-02 · Matriks Kegagalan Pengiriman dan Kode SMTP": chapter/CH-14-01-02.md
+          - "CH-14-01-03 · Kegagalan Autentikasi, TLS, dan DNS": chapter/CH-14-01-03.md
+          - "CH-14-01-04 · Penyebab Email Masuk Spam dan Penurunan Reputasi": chapter/CH-14-01-04.md
+      - "Incident Response":
+          - "CH-14-02-01 · Prosedur Incident Response dan Preservasi Forensik": chapter/CH-14-02-01.md
+          - "CH-14-02-02 · Investigasi Kompromi Akun dan Penyalahgunaan Antrian": chapter/CH-14-02-02.md
+          - "CH-14-02-03 · Pemulihan Setelah Kompromi dan Postmortem": chapter/CH-14-02-03.md
+  - "L14 · Infrastruktur Email Lanjutan (Opsional)":
+      - "Ringkasan Level 14": level/L14.md
+      - "Multi-Domain dan Routing":
+          - "CH-15-01-01 · Multiple Domain pada Satu Server": chapter/CH-15-01-01.md
+          - "CH-15-01-02 · Transport Routing Lanjutan": chapter/CH-15-01-02.md
+          - "CH-15-01-03 · Relay dan Smart Host": chapter/CH-15-01-03.md
+      - "Gateway dan Backend Pengguna":
+          - "CH-15-02-01 · Gateway Filtering Spam Terdedikasi": chapter/CH-15-02-01.md
+          - "CH-15-02-02 · Virtual User Berbasis SQL atau LDAP": chapter/CH-15-02-02.md
+          - "CH-15-02-03 · Centralized Logging": chapter/CH-15-02-03.md
+      - "Arsitektur Skala Besar":
+          - "CH-15-03-01 · Pertimbangan Kontainerisasi dan Docker": chapter/CH-15-03-01.md
+          - "CH-15-03-02 · Arsitektur High Availability dan DR": chapter/CH-15-03-02.md
+          - "CH-15-03-03 · Scaling, Desain Storage, dan Multi-Server": chapter/CH-15-03-03.md
+          - "CH-15-03-04 · Otomasi Administrasi yang Aman": chapter/CH-15-03-04.md
+  - "L15 · Capstone dan Penilaian Operasional":
+      - "Ringkasan Level 15": level/L15.md
+      - "Proyek Akhir":
+          - "CH-16-01-01 · Perencanaan dan Arsitektur Capstone": chapter/CH-16-01-01.md
+          - "CH-16-01-02 · Implementasi Mail Server Capstone": chapter/CH-16-01-02.md
+          - "CH-16-01-03 · Pengujian Mail Flow, Autentikasi, dan Kontrol Spam/Abuse": chapter/CH-16-01-03.md
+          - "CH-16-01-04 · Monitoring, Backup, Restore, dan Validasi Keamanan": chapter/CH-16-01-04.md
+          - "CH-16-01-05 · Dokumentasi, Runbook, dan Penilaian Kesiapan Produksi": chapter/CH-16-01-05.md

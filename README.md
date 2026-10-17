@@ -46,7 +46,7 @@ Keberhasilan di lab tidak otomatis berarti siap produksi. Setiap chapter membeda
 ## Status materi saat ini
 
 - Struktur: 16 level, 136 chapter terdaftar di dashboard.
-- **Materi terbit:** L0 (3 chapter), L1 (12 chapter), dan `CH-03-01-01` dari L2. Totalnya 16 chapter ditambah ringkasan level L0 dan L1.
+- **Materi terbit:** L0 (3 chapter), L1 (12 chapter), L2 (7 chapter), L3 (8 chapter), L4 (7 chapter), L5 (10 chapter), L6 (7 chapter), L7 (8 chapter), L8 (4 chapter), L9 (14 chapter), L10 (11 chapter), L11 (8 chapter), L12 (15 chapter), L13 (7 chapter), L14 (10 chapter, opsional), dan L15 (5 chapter, capstone dan level terakhir). Totalnya 136 chapter ditambah ringkasan level L0–L15, sehingga seluruh chapter di dashboard sudah terbit. Chapter L2–L15 belum diuji pada VM (`verified_on: null`).
 - Chapter lain masih berupa spesifikasi di dashboard dan akan ditulis bertahap tanpa mengubah ID.
 - Perintah Linux pada materi diuji secara terbatas (perintah baca-saja pada Ubuntu 24.04 di WSL2). Setiap chapter mencantumkan perintah mana yang **belum dijalankan** penulis; perhatikan catatan verifikasi di awal chapter dan jalankan perintah yang mengubah sistem hanya di VM lab, setelah membuat snapshot.
 
